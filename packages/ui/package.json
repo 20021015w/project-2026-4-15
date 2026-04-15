@@ -1,0 +1,12 @@
+{
+  "name": "@ui/components",
+  "version": "1.0.0",
+  "description": "UI components library",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "dumi dev",
+    "build:doc": "dumi build"
+  }
+}
