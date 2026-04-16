@@ -12,4 +12,5 @@ export type { HighlightKeywordProps } from './hightLightKeyWord';
 
 export { Ripple } from './ripple/index';
 
+export { ClickModal } from './modal';
 
