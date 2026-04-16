@@ -1,8 +1,10 @@
 import { useAppDispatch, useAppSelector } from '@/app/hook'
+import { useGurad } from '@/routers/useGuarg'
 import { Button } from 'antd'
 import { decrement, increment, selectCount } from '../features/conter/conterSlice'
 import styles from './index.less'
 const Home = () => {
+    useGurad()
     const number = useAppSelector(selectCount)
     const disPatch = useAppDispatch()
     return <>

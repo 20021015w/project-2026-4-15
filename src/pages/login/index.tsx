@@ -20,7 +20,7 @@ export const Login = () => {
       
       if (response.status === 200 && response.data) {
         const userData = {
-          ...response.data.user,
+          ...response.data.data.user,
           token: response.data.data.token
         };
         dispatch(update(userData));

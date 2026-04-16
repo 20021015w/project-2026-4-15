@@ -1,4 +1,5 @@
 import { EStoreSliceKey } from "@/app/config";
+import { RootState } from "@/app/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ListBase } from "./type";
 
@@ -42,6 +43,6 @@ const listSlice = createSlice({
 
 export const { addList, deleteTodo, deleteTodos, done } = listSlice.actions;
 
-export const todoList = (state: { list: ListBase[] }) => state.list;
+export const todoList = (state: RootState) => state[EStoreSliceKey.LIST] as ListBase[];
 
 export default listSlice.reducer;

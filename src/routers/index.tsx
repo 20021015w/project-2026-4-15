@@ -3,13 +3,17 @@ import { Login } from '@/pages/login';
 import { SEMaxgraph } from '@/pages/structure/structureDiagram';
 import { ListTodo } from '@/pages/todoList';
 import React from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import Home from '../pages/Home';
 
 // 创建路由配置
 const router = createBrowserRouter([
   {
-    path: '/',
+    path:'/',
+    element: <Navigate to="/login" replace />,
+  },
+  {
+    path: '/home',
     element: <Home />,
   },
   {

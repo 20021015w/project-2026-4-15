@@ -1,4 +1,5 @@
 import { EStoreSliceKey } from "@/app/config";
+import { RootState } from "@/app/store";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { CounterState } from "./type";
 
@@ -52,9 +53,9 @@ const counterSlice = createSlice({
 });
 export const { increment, decrement, incrementByAmount, reset } = counterSlice.actions;
 
-export const selectCount = (state: { counter: CounterState }) => state.counter.value;
-export const selectCounterStatus = (state: { counter: CounterState }) => state.counter.status;
-export const selectCounterError = (state: { counter: CounterState }) => state.counter.error;
+export const selectCount = (state:RootState) => state.value as string;
+export const selectCounterStatus = (state:RootState) => state.status;
+export const selectCounterError = (state: RootState) => state.error;
 
 export { counterSlice };
 export default counterSlice.reducer;

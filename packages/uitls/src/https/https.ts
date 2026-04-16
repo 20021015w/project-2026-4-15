@@ -70,7 +70,6 @@ export class Http {
     // 请求拦截器（添加token）
     this.axiosInstance.interceptors.request.use(
       (config) => {
-        console.log(config,'config')
         const token = localStorage.getItem('accessToken');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;

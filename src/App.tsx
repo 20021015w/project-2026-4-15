@@ -1,7 +1,6 @@
-import React from 'react';
-import { Provider } from 'react-redux';
 import { ConfigProvider } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
+import { Provider } from 'react-redux';
 import { store } from './app/store';
 import AppRouter from './routers';
 import './styles/App.css';
