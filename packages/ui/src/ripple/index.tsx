@@ -12,7 +12,7 @@ export const Ripple: FC<ERippleProps> = ({
   color = 'rgba(0,0,0,0.1)',
   duration = 450,
   children,
-  range = 0,
+  range = 30,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
