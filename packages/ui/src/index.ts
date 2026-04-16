@@ -10,4 +10,6 @@ export type { TreeListProps, TreeNode } from './Tree/type';
 export { HighlightKeyword } from './hightLightKeyWord';
 export type { HighlightKeywordProps } from './hightLightKeyWord';
 
+export { Ripple } from './ripple/index';
+
 

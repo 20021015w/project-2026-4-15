@@ -1,11 +1,12 @@
 import { update } from "@/features/userInfo/userInfoSlice"
+import { Ripple } from "@ui/components/src/ripple"
 import { Button, Form, Input, message } from "antd"
 import { useDispatch } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { Http } from "uitls"
 import styles from './index.less'
 
-export const Login = () => {
+const Logining = () => {
   const [form] = Form.useForm()
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -74,3 +75,6 @@ export const Login = () => {
     </div>
   )
 }
+export const Login = () => <Ripple range={100}>
+  <Logining/>
+</Ripple>

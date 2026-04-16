@@ -1,0 +1,18 @@
+// 涟漪容器
+.rippleContainer {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+
+  // 涟漪元素
+  .rippleItem {
+    position: absolute;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none; // 不阻挡点击
+    opacity: 1;
+    width: 0;
+    height: 0;
+    transition: all 0.45s ease; // 默认值，JS 会覆盖
+  }
+}

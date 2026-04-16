@@ -3,7 +3,7 @@ title: Tree
 order: 2
 ---
 
-# Button 按钮
+# Tree组件
 
 树形结构组件，支持搜索，拖曳，自定义树层内容结构
 
