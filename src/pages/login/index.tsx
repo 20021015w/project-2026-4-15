@@ -26,7 +26,7 @@ const Logining = () => {
         };
         dispatch(update(userData));
         message.success('登录成功');
-        navigate('/');
+        navigate('/home');
       } else {
         message.error(response.data.data.message || '登录失败');
       }

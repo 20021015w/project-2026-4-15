@@ -41,14 +41,42 @@ module.exports = {
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
+        target: 'http://localhost:3001',
+        changeOrigin: true,        // 改变 Origin 头，解决跨域
+        secure: false,             // 如果目标服务器是 HTTPS，设置为 true
+        ws: true,                  // 支持 WebSocket 代理
+        pathRewrite: {
+          // '^/api': '',          // 如果需要重写路径，取消注释
+        },
+        // 添加请求头
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+        // 代理日志
+        logLevel: 'debug',
+        // 自定义代理行为
+        onProxyReq: (proxyReq, req, res) => {
+          console.log(`[Proxy] ${req.method} ${req.url} -> ${proxyReq.path}`);
+        },
+        onProxyRes: (proxyRes, req, res) => {
+          // 添加跨域响应头
+          proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+          proxyRes.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, PATCH, OPTIONS';
+          proxyRes.headers['Access-Control-Allow-Headers'] = 'X-Requested-With, content-type, Authorization';
+        },
       },
+    },
+    // 允许跨域访问 devServer
+    allowedHosts: 'all',
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+      'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization',
     },
   },
   
   resolve: {
-    extensions: ['.tsx', '.ts', '.js', '.jsx','.less'],
+    extensions: ['.tsx', '.ts', '.js', '.jsx', '.less'],
     alias: {
       '@': path.resolve(__dirname, 'src'),
       '@components': path.resolve(__dirname, 'src/components'),
@@ -56,6 +84,10 @@ module.exports = {
       '@pages': path.resolve(__dirname, 'src/pages'),
       '@hooks': path.resolve(__dirname, 'src/hooks'),
       '@utils': path.resolve(__dirname, 'src/utils'),
+    },
+    fallback: {
+      // 如果遇到 polyfill 问题，可以添加
+      // "path": require.resolve("path-browserify"),
     },
   },
   
@@ -72,34 +104,33 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: [
-        "@babel/preset-env",
-        ["@babel/preset-react", { runtime: "automatic" }],
-        "@babel/preset-typescript"
-      ],
+              "@babel/preset-env",
+              ["@babel/preset-react", { runtime: "automatic" }],
+              "@babel/preset-typescript"
+            ],
             cacheDirectory: true,
             plugins: isDevelopment ? ['react-refresh/babel'] : []
           },
         },
       },
       {
-        test: /\.less$/,  // 匹配 .less 文件
+        test: /\.less$/,
         use: [
-          'style-loader',  // 将 CSS 注入到 DOM
+          'style-loader',
           {
             loader: 'css-loader',
             options: {
               modules: {
-                // 启用 CSS Modules，这样就能用 import styles from './index.less'
                 localIdentName: '[local]--[hash:base64:5]',
               },
-              importLoaders: 2,  // 在 css-loader 前应用的 loader 数
+              importLoaders: 2,
             },
           },
           {
             loader: 'less-loader',
             options: {
               lessOptions: {
-                javascriptEnabled: true,  // 允许在 Less 中使用 JavaScript
+                javascriptEnabled: true,
               },
             },
           },
@@ -157,7 +188,7 @@ module.exports = {
         type: 'asset',
         parser: {
           dataUrlCondition: {
-            maxSize: 8 * 1024, // 8kb
+            maxSize: 8 * 1024,
           },
         },
         generator: {
@@ -171,7 +202,6 @@ module.exports = {
           filename: 'assets/fonts/[name].[hash][ext]',
         },
       },
-
     ],
   },
   
@@ -196,6 +226,7 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+      'process.env.API_URL': JSON.stringify(process.env.API_URL || 'http://localhost:5000'),
     }),
     isDevelopment && new ReactRefreshWebpackPlugin(),
     isDevelopment && new webpack.HotModuleReplacementPlugin(),
@@ -241,5 +272,10 @@ module.exports = {
     buildDependencies: {
       config: [__filename],
     },
+  },
+  
+  // 开发环境忽略性能提示
+  performance: {
+    hints: isDevelopment ? false : 'warning',
   },
 };
