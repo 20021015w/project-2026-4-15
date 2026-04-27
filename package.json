@@ -19,16 +19,19 @@
     "@maxgraph/shared": "workspace:*",
     "@ngrok/ngrok": "^1.7.0",
     "@reduxjs/toolkit": "^2.0.1",
+    "@types/lodash": "^4.17.24",
     "@types/mockjs": "^1.0.10",
     "@types/react-router-dom": "^5.3.3",
     "@ui/components": "workspace:*",
-    "uitls": "workspace:*",
     "antd": "^5.8.6",
     "axios": "^1.5.0",
+    "lodash": "^4.18.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-draggable": "^4.5.0",
     "react-redux": "^8.1.2",
-    "react-router-dom": "^7.14.0"
+    "react-router-dom": "^7.14.0",
+    "uitls": "workspace:*"
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",
