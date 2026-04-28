@@ -8,11 +8,11 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 
 module.exports = {
   mode: isDevelopment ? 'development' : 'production',
-  
+
   entry: {
     main: './src/index.tsx',
   },
-  
+
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: isDevelopment ? '[name].js' : '[name].[contenthash].js',
@@ -20,9 +20,9 @@ module.exports = {
     publicPath: '/',
     clean: true,
   },
-  
+
   devtool: isDevelopment ? 'eval-source-map' : 'source-map',
-  
+
   devServer: {
     static: {
       directory: path.join(__dirname, 'public'),
@@ -74,7 +74,7 @@ module.exports = {
       'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization',
     },
   },
-  
+
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.jsx', '.less'],
     alias: {
@@ -83,14 +83,13 @@ module.exports = {
       '@features': path.resolve(__dirname, 'src/features'),
       '@pages': path.resolve(__dirname, 'src/pages'),
       '@hooks': path.resolve(__dirname, 'src/hooks'),
-      '@utils': path.resolve(__dirname, 'src/utils'),
     },
     fallback: {
       // 如果遇到 polyfill 问题，可以添加
       // "path": require.resolve("path-browserify"),
     },
   },
-  
+
   module: {
     rules: [
       {
@@ -146,8 +145,8 @@ module.exports = {
               importLoaders: 1,
               modules: {
                 auto: true,
-                localIdentName: isDevelopment 
-                  ? '[path][name]__[local]--[hash:base64:5]' 
+                localIdentName: isDevelopment
+                  ? '[path][name]__[local]--[hash:base64:5]'
                   : '[hash:base64:8]',
               },
             },
@@ -165,8 +164,8 @@ module.exports = {
             options: {
               importLoaders: 1,
               modules: {
-                localIdentName: isDevelopment 
-                  ? '[path][name]__[local]--[hash:base64:5]' 
+                localIdentName: isDevelopment
+                  ? '[path][name]__[local]--[hash:base64:5]'
                   : '[hash:base64:8]',
               },
             },
@@ -204,7 +203,7 @@ module.exports = {
       },
     ],
   },
-  
+
   plugins: [
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
@@ -231,34 +230,87 @@ module.exports = {
     isDevelopment && new ReactRefreshWebpackPlugin(),
     isDevelopment && new webpack.HotModuleReplacementPlugin(),
   ].filter(Boolean),
-  
+
   optimization: {
     splitChunks: {
       chunks: 'all',
       cacheGroups: {
-        vendors: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
+        // 1. 最高优先级：antd UI 库（最大）
+        antd: {
+          test: /[\\/]node_modules[\\/](antd|@ant-design)[\\/]/,
+          name: 'antd',
           chunks: 'all',
-          priority: 10,
+          priority: 30,  // 最高优先级
+          enforce: true,  // 强制创建 chunk
         },
+
+        // 2. React 核心
         react: {
           test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
           name: 'react',
           chunks: 'all',
-          priority: 20,
+          priority: 25,
         },
+
+        // 3. Redux
         redux: {
           test: /[\\/]node_modules[\\/](@reduxjs|redux)[\\/]/,
           name: 'redux',
           chunks: 'all',
-          priority: 15,
+          priority: 22,
         },
+
+        // 4. 内部 workspace 包（通过 node_modules 软链接）
+        '@ui': {
+          test: /[\\/]node_modules[\\/]@ui[\\/]/,
+          name: '@ui',
+          chunks: 'all',
+          priority: 20,
+        },
+        '@utils': {
+          test: /[\\/]node_modules[\\/]@utils[\\/]/,
+          name: '@utils',
+          chunks: 'all',
+          priority: 20,
+        },
+        '@maxgraph': {
+          test: /[\\/]node_modules[\\/]@maxgraph[\\/]/,
+          name: '@maxgraph',
+          chunks: 'all',
+          priority: 20,
+        },
+
+        // 5. 其他大库（可选）
+        lodash: {
+          test: /[\\/]node_modules[\\/]lodash[\\/]/,
+          name: 'lodash',
+          chunks: 'all',
+          priority: 18,
+        },
+
+        // 6. 剩下的 packages（源码中的，不是 node_modules）
+        packages: {
+          test: /[\\/]packages[\\/]/,
+          name: 'packages',
+          chunks: 'all',
+          priority: 8,
+          reuseExistingChunk: true,
+        },
+
+        // 7. 其他第三方库兜底（优先级最低）
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+          priority: 5,  // 降低优先级
+        },
+
+        // 8. 公共业务代码
         commons: {
           name: 'commons',
           minChunks: 2,
           chunks: 'all',
-          priority: 5,
+          priority: 0,
           reuseExistingChunk: true,
         },
       },
@@ -266,14 +318,14 @@ module.exports = {
     runtimeChunk: 'single',
     minimize: !isDevelopment,
   },
-  
+
   cache: {
     type: 'filesystem',
     buildDependencies: {
       config: [__filename],
     },
   },
-  
+
   // 开发环境忽略性能提示
   performance: {
     hints: isDevelopment ? false : 'warning',

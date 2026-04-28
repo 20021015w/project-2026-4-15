@@ -1,6 +1,6 @@
 import { Tree, type TreeNode } from '@ui/components';
 import { FC } from "react";
-export const HasDone:FC = () => {
+const HasDone:FC = () => {
   const farkData:TreeNode[] =  [
   {
     key: '1',
@@ -28,3 +28,4 @@ export const HasDone:FC = () => {
 ];
   return <Tree data={farkData}></Tree>
 }
+export default HasDone

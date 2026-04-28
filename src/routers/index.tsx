@@ -1,10 +1,15 @@
-import { HasDone } from '@/pages/hasDone';
-import { Login } from '@/pages/login';
-import { SEMaxgraph } from '@/pages/structure/structureDiagram';
-import { ListTodo } from '@/pages/todoList';
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
-import Home from '../pages/Home';
+
+// 使用lazy加载组件
+const Home = lazy(() => import('../pages/Home'));
+const Login = lazy(() => import('@/pages/login'));
+const ListTodo = lazy(() => import('@/pages/todoList'));
+const HasDone = lazy(() => import('@/pages/hasDone'));
+const SEMaxgraph = lazy(() => import('@/pages/structure/structureDiagram'))
+
+// 加载中组件
+const Loading = () => <div>Loading...</div>;
 
 // 创建路由配置
 const router = createBrowserRouter([
@@ -14,28 +19,47 @@ const router = createBrowserRouter([
   },
   {
     path: '/home',
-    element: <Home />,
+    element: (
+      <Suspense fallback={<Loading />}>
+        <Home />
+      </Suspense>
+    ),
   },
   {
     path:'/login',
-    element:<Login />
+    element: (
+      <Suspense fallback={<Loading />}>
+        <Login />
+      </Suspense>
+    )
   },
   {
     path: '/todo',
-    element: <ListTodo />,
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ListTodo />
+      </Suspense>
+    ),
     children:[
       {
         path:'hasDone',
-        element:<HasDone />
+        element: (
+          <Suspense fallback={<Loading />}>
+            <HasDone />
+          </Suspense>
+        )
       }
     ]
   },
   {
     path: '/diagram',
-    element: <SEMaxgraph />,
+    element: (
+      <Suspense fallback={<Loading />}>
+        <SEMaxgraph />
+      </Suspense>
+    ),
   },
 ]);
-
 
 // 导出路由提供器组件
 const AppRouter: React.FC = () => {

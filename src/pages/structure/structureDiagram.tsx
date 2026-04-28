@@ -3,7 +3,7 @@ import { createGraphService, GraphService } from "@maxgraph/shared"
 import { useEffect, useState } from "react"
 import styles from './structureDiagram.less'
 
-export const SEMaxgraph = () => {
+ const SEMaxgraph = () => {
   // 保存 graph 实例
   const [graphService, setGraphService] = useState<GraphService | null>(null)
 
@@ -76,3 +76,4 @@ export const SEMaxgraph = () => {
     </>
   )
 }
+export default SEMaxgraph

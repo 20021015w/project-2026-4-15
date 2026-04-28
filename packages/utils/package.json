@@ -1,5 +1,5 @@
 {
-  "name": "uitls",
+  "name": "@utils/method",
   "version": "1.0.0",
   "description": "Utility functions",
   "main": "src/index.ts",

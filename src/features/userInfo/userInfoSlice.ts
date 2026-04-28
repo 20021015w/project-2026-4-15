@@ -1,7 +1,7 @@
 import { EStoreSliceKey } from "@/app/config";
 import { RootState } from "@/app/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { LocalStorage } from "uitls";
+import { LocalStorage } from "@utils/method";
 import { UserInfo } from "./type";
 
 export const userInfoSlice = createSlice({

@@ -1,9 +1,9 @@
 import { update } from "@/features/userInfo/userInfoSlice"
 import { Ripple } from "@ui/components/src/ripple"
+import { Http } from "@utils/method"
 import { Button, Form, Input, message } from "antd"
 import { useDispatch } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import { Http } from "uitls"
 import styles from './index.less'
 
 const Logining = () => {
@@ -75,6 +75,7 @@ const Logining = () => {
     </div>
   )
 }
-export const Login = () => <Ripple range={100}>
+const  Login = () => <Ripple range={100}>
   <Logining/>
 </Ripple>
+export  default Login

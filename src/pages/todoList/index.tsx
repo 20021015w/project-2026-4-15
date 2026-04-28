@@ -6,7 +6,7 @@ import { Button, Checkbox, Input, List, Popconfirm, Space } from "antd"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { Outlet } from "react-router-dom"
 import styles from './index.less'
-export const ListTodo = () => {
+ const ListTodo = () => {
   const dispatch = useAppDispatch()
   // ✅ 优化1：使用slice()创建副本避免修改原数组
   const dataSource = useAppSelector(todoList)
@@ -222,3 +222,4 @@ export const ListTodo = () => {
     </div>
   )
 }
+export default ListTodo
