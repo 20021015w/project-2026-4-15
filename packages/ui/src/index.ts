@@ -14,3 +14,5 @@ export { Ripple } from './ripple/index';
 
 export { ClickModal } from './modal';
 
+export { NormalTable } from './table/index';
+
