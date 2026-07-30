@@ -18,6 +18,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "ali-react-table": "^2.6.1",
     "react-draggable": "^4.5.0"
   }
 }

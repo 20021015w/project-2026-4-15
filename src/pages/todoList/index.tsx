@@ -8,7 +8,6 @@ import { Outlet } from "react-router-dom"
 import styles from './index.less'
  const ListTodo = () => {
   const dispatch = useAppDispatch()
-  // ✅ 优化1：使用slice()创建副本避免修改原数组
   const dataSource = useAppSelector(todoList)
     .slice()
     .sort((a, b) => a.displayIndex - b.displayIndex)
@@ -16,10 +15,8 @@ import styles from './index.less'
   const inputRef = useRef<any>(null)
   const [isEditing, setIsEditing] = useState<boolean>(false)
   
-  // ✅ 优化2：使用Set管理选中状态，性能更好
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   
-  // ✅ 优化3：计算选中数量
   const selectedCount = useMemo(() => selectedIds.size, [selectedIds])
   
   const onToggle = useCallback((id: string) => {
@@ -28,7 +25,6 @@ import styles from './index.less'
   
   const onDelete = useCallback((id: string) => {
     dispatch(deleteTodo(id))
-    // 删除后从选中集中移除
     setSelectedIds(prev => {
       const newSet = new Set(prev)
       newSet.delete(id)
@@ -36,14 +32,12 @@ import styles from './index.less'
     })
   }, [dispatch])
   
-  // ✅ 优化4：批量删除
   const onBatchDelete = useCallback(() => {
     if (selectedIds.size === 0) return
     dispatch(deleteTodos(Array.from(selectedIds)))
     setSelectedIds(new Set()) // 清空选中
   }, [dispatch, selectedIds])
   
-  // ✅ 优化5：全选/取消全选
   const onSelectAll = useCallback(() => {
     if (selectedIds.size === dataSource.length) {
       setSelectedIds(new Set()) // 全部取消
@@ -52,7 +46,6 @@ import styles from './index.less'
     }
   }, [dataSource, selectedIds])
   
-  // ✅ 优化6：单个选中/取消
   const onSelectItem = useCallback((id: string, checked: boolean) => {
     setSelectedIds(prev => {
       const newSet = new Set(prev)
@@ -90,7 +83,6 @@ import styles from './index.less'
   
   return (
     <div className={styles.container}>
-      {/* ✅ 优化7：批量操作栏 */}
       <div className={styles.list}>
         <Space>
           <Checkbox 
