@@ -1,0 +1,36 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app-runtime
+    image: react-redux-pnpm-app:latest
+    container_name: rrp-app
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  docs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: docs-runtime
+    image: react-redux-pnpm-docs:latest
+    container_name: rrp-docs
+    ports:
+      - "8000:80"
+    restart: unless-stopped
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

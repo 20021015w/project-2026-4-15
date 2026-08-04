@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "ali-react-table": "^2.6.1",
+    "flexlayout-react": "^0.8.17",
     "react-draggable": "^4.5.0"
   }
 }

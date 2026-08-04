@@ -1,14 +1,13 @@
 import { EStoreSliceKey } from "@/app/config";
-import { RootState } from "@/app/store";
+import type { RootState } from "@/app/store";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { CounterState } from "./type";
-
-
+import type { CounterState } from "./type";
 const initialState: CounterState = {
   value: 0,
   status: 'idle',
   error: null,
 };
+
 export const fetchCount = createAsyncThunk(
   'counter/fetchCount',
   async (amount: number) => {
@@ -18,8 +17,9 @@ export const fetchCount = createAsyncThunk(
     return response.data;
   }
 );
+
 const counterSlice = createSlice({
-  name: EStoreSliceKey.COUNTER,
+  name: EStoreSliceKey.COUNTER, // 这个name必须和动态reducer的key完全一致
   initialState,
   reducers: {
     increment: (state) => {
@@ -51,11 +51,11 @@ const counterSlice = createSlice({
       });
   },
 });
+
 export const { increment, decrement, incrementByAmount, reset } = counterSlice.actions;
+const selectCounterSlice = (state: RootState): CounterState => state[EStoreSliceKey.COUNTER] as CounterState;
+export const selectCount = (state: RootState) => selectCounterSlice(state).value;
+export const selectCounterStatus = (state: RootState) => selectCounterSlice(state).status;
+export const selectCounterError = (state: RootState) => selectCounterSlice(state).error;
 
-export const selectCount = (state:RootState) => state.value as string;
-export const selectCounterStatus = (state:RootState) => state.status;
-export const selectCounterError = (state: RootState) => state.error;
-
-export { counterSlice };
 export default counterSlice.reducer;

@@ -44,6 +44,9 @@ const Logining = () => {
           form={form} 
           onFinish={handleSubmit}
           layout="vertical"
+          onValuesChange={() => {
+            
+          }}
         >
           <Form.Item 
             label="用户名" 

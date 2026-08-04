@@ -21,7 +21,8 @@ module.exports = {
     clean: true,
   },
 
-  devtool: isDevelopment ? 'eval-source-map' : 'source-map',
+  // eval-cheap-module-source-map: 行级 source map，转译快，重新编译只重算出错行
+  devtool: isDevelopment ? 'eval-cheap-module-source-map' : 'source-map',
 
   devServer: {
     static: {
@@ -94,7 +95,8 @@ module.exports = {
     rules: [
       {
         test: /\.[jt]sx?$/,
-        exclude: /node_modules\/(?!(@maxgraph\/core|@maxgraph\/shared)\/)/,
+        // 仅处理 src 与 packages（workspace 包经 symlink 解析后落在此处）
+        // 移除带负向断言的 exclude，正则求值更便宜
         include: [
           path.resolve(__dirname, 'src'),
           path.resolve(__dirname, 'packages')
@@ -205,7 +207,8 @@ module.exports = {
   },
 
   plugins: [
-    new CleanWebpackPlugin(),
+    // dev server 产物在内存中，无需清盘；生产构建由 output.clean 负责
+    !isDevelopment && new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: './public/index.html',
       filename: 'index.html',
@@ -231,93 +234,99 @@ module.exports = {
     isDevelopment && new webpack.HotModuleReplacementPlugin(),
   ].filter(Boolean),
 
-  optimization: {
-    splitChunks: {
-      chunks: 'all',
-      cacheGroups: {
-        // 1. 最高优先级：antd UI 库（最大）
-        antd: {
-          test: /[\\/]node_modules[\\/](antd|@ant-design)[\\/]/,
-          name: 'antd',
+  // 开发环境关闭 splitChunks / runtimeChunk，减少编译开销；生产环境保留完整分包
+  optimization: isDevelopment
+    ? {
+        splitChunks: false,
+        runtimeChunk: false,
+      }
+    : {
+        splitChunks: {
           chunks: 'all',
-          priority: 30,  // 最高优先级
-          enforce: true,  // 强制创建 chunk
-        },
+          cacheGroups: {
+            // 1. 最高优先级：antd UI 库（最大）
+            antd: {
+              test: /[\\/]node_modules[\\/](antd|@ant-design)[\\/]/,
+              name: 'antd',
+              chunks: 'all',
+              priority: 30,
+              enforce: true,
+            },
 
-        // 2. React 核心
-        react: {
-          test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
-          name: 'react',
-          chunks: 'all',
-          priority: 25,
-        },
+            // 2. React 核心
+            react: {
+              test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+              name: 'react',
+              chunks: 'all',
+              priority: 25,
+            },
 
-        // 3. Redux
-        redux: {
-          test: /[\\/]node_modules[\\/](@reduxjs|redux)[\\/]/,
-          name: 'redux',
-          chunks: 'all',
-          priority: 22,
-        },
+            // 3. Redux
+            redux: {
+              test: /[\\/]node_modules[\\/](@reduxjs|redux)[\\/]/,
+              name: 'redux',
+              chunks: 'all',
+              priority: 22,
+            },
 
-        // 4. 内部 workspace 包（通过 node_modules 软链接）
-        '@ui': {
-          test: /[\\/]node_modules[\\/]@ui[\\/]/,
-          name: '@ui',
-          chunks: 'all',
-          priority: 20,
-        },
-        '@utils': {
-          test: /[\\/]node_modules[\\/]@utils[\\/]/,
-          name: '@utils',
-          chunks: 'all',
-          priority: 20,
-        },
-        '@maxgraph': {
-          test: /[\\/]node_modules[\\/]@maxgraph[\\/]/,
-          name: '@maxgraph',
-          chunks: 'all',
-          priority: 20,
-        },
+            // 4. 内部 workspace 包（通过 node_modules 软链接）
+            '@ui': {
+              test: /[\\/]node_modules[\\/]@ui[\\/]/,
+              name: '@ui',
+              chunks: 'all',
+              priority: 20,
+            },
+            '@utils': {
+              test: /[\\/]node_modules[\\/]@utils[\\/]/,
+              name: '@utils',
+              chunks: 'all',
+              priority: 20,
+            },
+            '@maxgraph': {
+              test: /[\\/]node_modules[\\/]@maxgraph[\\/]/,
+              name: '@maxgraph',
+              chunks: 'all',
+              priority: 20,
+            },
 
-        // 5. 其他大库（可选）
-        lodash: {
-          test: /[\\/]node_modules[\\/]lodash[\\/]/,
-          name: 'lodash',
-          chunks: 'all',
-          priority: 18,
-        },
+            // 5. 其他大库（可选）
+            lodash: {
+              test: /[\\/]node_modules[\\/]lodash[\\/]/,
+              name: 'lodash',
+              chunks: 'all',
+              priority: 18,
+            },
 
-        // 6. 剩下的 packages（源码中的，不是 node_modules）
-        packages: {
-          test: /[\\/]packages[\\/]/,
-          name: 'packages',
-          chunks: 'all',
-          priority: 8,
-          reuseExistingChunk: true,
-        },
+            // 6. 剩下的 packages（源码中的，不是 node_modules）
+            packages: {
+              test: /[\\/]packages[\\/]/,
+              name: 'packages',
+              chunks: 'all',
+              priority: 8,
+              reuseExistingChunk: true,
+            },
 
-        // 7. 其他第三方库兜底（优先级最低）
-        vendors: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          chunks: 'all',
-          priority: 5,  // 降低优先级
-        },
+            // 7. 其他第三方库兜底（优先级最低）
+            vendors: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              chunks: 'all',
+              priority: 5,
+            },
 
-        // 8. 公共业务代码
-        commons: {
-          name: 'commons',
-          minChunks: 2,
-          chunks: 'all',
-          priority: 0,
-          reuseExistingChunk: true,
+            // 8. 公共业务代码
+            commons: {
+              name: 'commons',
+              minChunks: 2,
+              chunks: 'all',
+              priority: 0,
+              reuseExistingChunk: true,
+            },
+          },
         },
+        runtimeChunk: 'single',
+        minimize: true,
       },
-    },
-    runtimeChunk: 'single',
-    minimize: !isDevelopment,
-  },
 
   cache: {
     type: 'filesystem',

@@ -11,6 +11,7 @@ import styles from './index.less'
   const dataSource = useAppSelector(todoList)
     .slice()
     .sort((a, b) => a.displayIndex - b.displayIndex)
+  console.log(dataSource)
   const [inputValue, setInputValue] = useState<string>('')
   const inputRef = useRef<any>(null)
   const [isEditing, setIsEditing] = useState<boolean>(false)

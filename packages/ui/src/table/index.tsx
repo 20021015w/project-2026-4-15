@@ -7,7 +7,7 @@ import { INormalTableSelection, INormdalTableProps } from './type'
  * 基于 ali-react-table 的 BaseTable 二次封装。
  * - 透传所有原生 props
  * - 提供默认主键、加载态、空数据展示等通用配置
- * - 内置 TablePipeline，支持通过 selection 配置开启单选/多选
+ * - 内置 TablePipeline，通过链式 .use() 接入 singleSelect / multiSelect
  */
 export const NormalTable: FC<INormdalTableProps> = ({
   primaryKey = 'id',
@@ -36,22 +36,24 @@ export const NormalTable: FC<INormdalTableProps> = ({
   }, [components])
 
   // 非受控模式下的内部选中状态
-  const [innerSingleValue, setInnerSingleValue] = useState<string>('')
-  const [innerMultiValue, setInnerMultiValue] = useState<string[]>([])
+  const [innerSingleValue, setInnerSingleValue] = useState<string>(
+    typeof selection?.defaultValue === 'string' ? selection.defaultValue : '',
+  )
+  const [innerMultiValue, setInnerMultiValue] = useState<string[]>(
+    Array.isArray(selection?.defaultValue) ? selection.defaultValue : [],
+  )
 
   const pipeline = useTablePipeline({
     primaryKey,
     components: { Radio, Checkbox },
   })
-  pipeline.input({ dataSource: dataSource ?? [], columns: columns ?? [] })
 
-  // 应用选择能力
-  useSelection(pipeline, selection, {
-    innerSingleValue,
-    setInnerSingleValue,
-    innerMultiValue,
-    setInnerMultiValue,
-  })
+  // 构建链式调用：input → use(singleSelect | multiSelect)
+  pipeline.input({ dataSource: dataSource ?? [], columns: columns ?? [] }).use(
+    selection?.type === 'multiple'
+      ? features.multiSelect(buildMultiSelectOptions(selection, innerMultiValue, setInnerMultiValue))
+      : features.singleSelect(buildSingleSelectOptions(selection, innerSingleValue, setInnerSingleValue)),
+  )
 
   // pipeline 输出的 props（包含 dataSource/columns/primaryKey/getRowProps）
   const pipelineProps = pipeline.getProps()
@@ -71,77 +73,86 @@ export const NormalTable: FC<INormdalTableProps> = ({
   )
 }
 
-interface SelectionState {
-  innerSingleValue: string
-  setInnerSingleValue: (v: string) => void
-  innerMultiValue: string[]
-  setInnerMultiValue: (v: string[]) => void
-}
-
-function useSelection(
-  pipeline: ReturnType<typeof useTablePipeline>,
+/** 构建 singleSelect 配置 */
+function buildSingleSelectOptions(
   selection: INormalTableSelection | undefined,
-  state: SelectionState,
+  innerValue: string,
+  setInnerValue: (v: string) => void,
 ) {
-  if (!selection) return
-
+  if (!selection) {
+    return {
+      highlightRowWhenSelected: true,
+      radioPlacement: 'start' as const,
+      clickArea: 'row' as const,
+    }
+  }
   const {
-    type = 'single',
     value,
     defaultValue,
     onChange,
     highlightRowWhenSelected,
     isDisabled,
-    clickArea = type === 'multiple' ? 'checkbox' : 'radio',
+    clickArea = 'radio',
     placement = 'start',
     stopClickEventPropagation,
   } = selection
+  const controlledValue = typeof value === 'string' ? value : undefined
+  const initialDefault = typeof defaultValue === 'string' ? defaultValue : undefined
+  return {
+    value: controlledValue ?? innerValue,
+    defaultValue: initialDefault,
+    highlightRowWhenSelected,
+    isDisabled,
+    clickArea: clickArea as 'radio' | 'cell' | 'row',
+    radioPlacement: placement as 'start' | 'end',
+    stopClickEventPropagation,
+    onChange: (next: string) => {
+      setInnerValue(next)
+      ;(onChange as (next: string) => void)?.(next)
+    },
+  }
+}
 
-  if (type === 'multiple') {
-    const controlledValue = (Array.isArray(value) ? value : undefined) as string[] | undefined
-    const initialDefault = (Array.isArray(defaultValue) ? defaultValue : undefined) as string[] | undefined
-    const effectiveValue = controlledValue ?? state.innerMultiValue
-    // 首次渲染时同步 defaultValue
-    if (controlledValue === undefined && initialDefault && state.innerMultiValue.length === 0) {
-      state.setInnerMultiValue(initialDefault)
-    }
-    pipeline.use(
-      features.multiSelect({
-        value: effectiveValue,
-        defaultValue: initialDefault,
-        highlightRowWhenSelected,
-        isDisabled,
-        clickArea: clickArea as 'checkbox' | 'cell' | 'row',
-        checkboxPlacement: placement,
-        stopClickEventPropagation,
-        onChange: (next, key, keys, action) => {
-          state.setInnerMultiValue(next)
-          ;(onChange as (next: string[], key: string, keys: string[], action: 'check' | 'uncheck' | 'check-all' | 'uncheck-all') => void)?.(next, key, keys, action)
-        },
-      }),
-    )
-  } else {
-    const controlledValue = typeof value === 'string' ? value : undefined
-    const initialDefault = typeof defaultValue === 'string' ? defaultValue : undefined
-    const effectiveValue = controlledValue ?? state.innerSingleValue
-    if (controlledValue === undefined && initialDefault && !state.innerSingleValue) {
-      state.setInnerSingleValue(initialDefault)
-    }
-    pipeline.use(
-      features.singleSelect({
-        value: effectiveValue,
-        defaultValue: initialDefault,
-        highlightRowWhenSelected,
-        isDisabled,
-        clickArea: clickArea as 'radio' | 'cell' | 'row',
-        radioPlacement: placement,
-        stopClickEventPropagation,
-        onChange: (next) => {
-          state.setInnerSingleValue(next)
-          ;(onChange as (next: string) => void)?.(next)
-        },
-      }),
-    )
+/** 构建 multiSelect 配置 */
+function buildMultiSelectOptions(
+  selection: INormalTableSelection,
+  innerValue: string[],
+  setInnerValue: (v: string[]) => void,
+) {
+  const {
+    value,
+    defaultValue,
+    onChange,
+    highlightRowWhenSelected,
+    isDisabled,
+    clickArea = 'checkbox',
+    placement = 'start',
+    stopClickEventPropagation,
+  } = selection
+  const controlledValue = Array.isArray(value) ? value : undefined
+  const initialDefault = Array.isArray(defaultValue) ? defaultValue : undefined
+  return {
+    value: controlledValue ?? innerValue,
+    defaultValue: initialDefault,
+    highlightRowWhenSelected,
+    isDisabled,
+    clickArea: clickArea as 'checkbox' | 'cell' | 'row',
+    checkboxPlacement: placement as 'start' | 'end',
+    stopClickEventPropagation,
+    onChange: (
+      next: string[],
+      key: string,
+      keys: string[],
+      action: 'check' | 'uncheck' | 'check-all' | 'uncheck-all',
+    ) => {
+      setInnerValue(next)
+      ;(onChange as (next: string[], key: string, keys: string[], action: 'check' | 'uncheck' | 'check-all' | 'uncheck-all') => void)?.(
+        next,
+        key,
+        keys,
+        action,
+      )
+    },
   }
 }
 

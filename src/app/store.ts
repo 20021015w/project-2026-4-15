@@ -5,11 +5,9 @@ const reducer: Record<string, any> = {};
 
 // 创建一个context来获取所有的slice文件
 const sliceContext = (require as any).context('../features', true, /Slice\.ts$/);
-console.log(sliceContext,'ad')
 // 遍历所有的slice文件
 sliceContext.keys().forEach((key:string) => {
   const sliceModule = sliceContext(key);
-  
   // 尝试获取slice对象（可能是命名导出）
   let sliceObject = null;
   let sliceReducer = null;
