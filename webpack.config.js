@@ -22,7 +22,7 @@ module.exports = {
   },
 
   // eval-cheap-module-source-map: 行级 source map，转译快，重新编译只重算出错行
-  devtool: isDevelopment ? 'eval-cheap-module-source-map' : 'source-map',
+  devtool: isDevelopment ? 'eval-source-map' : 'source-map',
 
   devServer: {
     static: {
@@ -110,7 +110,8 @@ module.exports = {
               "@babel/preset-typescript"
             ],
             cacheDirectory: true,
-            plugins: isDevelopment ? ['react-refresh/babel'] : []
+            plugins: isDevelopment ? ['react-refresh/babel'] : [],
+             sourceMaps: true,
           },
         },
       },

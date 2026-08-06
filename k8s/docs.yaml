@@ -1,0 +1,59 @@
+﻿# 文档站 Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rrp-docs
+  labels:
+    app: rrp-docs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rrp-docs
+  template:
+    metadata:
+      labels:
+        app: rrp-docs
+    spec:
+      containers:
+        - name: docs
+          image: react-redux-pnpm-docs:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+# 文档站 Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: rrp-docs
+  labels:
+    app: rrp-docs
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8000
+      targetPort: 80
+      protocol: TCP
+      name: http
+  selector:
+    app: rrp-docs

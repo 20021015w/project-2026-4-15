@@ -1,0 +1,59 @@
+﻿# 主应用 Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rrp-app
+  labels:
+    app: rrp-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rrp-app
+  template:
+    metadata:
+      labels:
+        app: rrp-app
+    spec:
+      containers:
+        - name: app
+          image: react-redux-pnpm-app:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+# 主应用 Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: rrp-app
+  labels:
+    app: rrp-app
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app: rrp-app

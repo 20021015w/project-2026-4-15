@@ -39,14 +39,10 @@ const Logining = () => {
   return (
     <div className={styles.loginPageContainer}>
       <div className={styles.loginForm}>
-        <h2>用户登录</h2>
         <Form 
           form={form} 
           onFinish={handleSubmit}
           layout="vertical"
-          onValuesChange={() => {
-            
-          }}
         >
           <Form.Item 
             label="用户名" 
