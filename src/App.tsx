@@ -1,18 +1,17 @@
-import { ConfigProvider } from 'antd';
-import zhCN from 'antd/locale/zh_CN';
-import { Provider } from 'react-redux';
-import { store } from './app/store';
-import AppRouter from './routers';
+import { ConfigProvider } from "antd";
+import zhCN from "antd/locale/zh_CN";
+import { Provider } from "react-redux";
+import { store } from "./app/store";
+import AppRouter from "./routers";
 
 function App() {
-  
   return (
     <Provider store={store}>
-           <ConfigProvider
+      <ConfigProvider
         locale={zhCN}
         theme={{
           token: {
-            colorPrimary: '#1890ff',
+            colorPrimary: "#1890ff",
             borderRadius: 6,
           },
         }}
