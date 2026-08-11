@@ -1,7 +1,7 @@
 // client/src/components/ChatInput.tsx
-import { SendOutlined } from '@ant-design/icons';
-import { Button, Input } from 'antd';
-import React, { KeyboardEvent, useState } from 'react';
+import { SendOutlined } from "@ant-design/icons";
+import { Button, Input } from "antd";
+import React, { KeyboardEvent, useState } from "react";
 
 const { TextArea } = Input;
 
@@ -11,22 +11,22 @@ interface ChatInputProps {
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
-  const [inputValue, setInputValue] = useState('');
-  
+  const [inputValue, setInputValue] = useState("");
+
   const handleSend = () => {
     if (inputValue.trim() && !disabled) {
       onSend(inputValue.trim());
-      setInputValue('');
+      setInputValue("");
     }
   };
-  
+
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
   };
-  
+
   return (
     <div className="chat-input-container">
       <TextArea

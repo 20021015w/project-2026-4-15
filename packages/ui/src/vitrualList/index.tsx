@@ -1,5 +1,5 @@
-import type { FC } from "react"
+import type { FC } from "react";
 
-export const VirtualList:FC = () => {
-  return <></>
-}
+export const VirtualList: FC = () => {
+  return <></>;
+};

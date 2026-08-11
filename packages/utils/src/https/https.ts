@@ -1,9 +1,14 @@
-import axios, { AxiosError, AxiosPromise, AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, {
+  AxiosError,
+  AxiosPromise,
+  AxiosRequestConfig,
+  AxiosResponse,
+} from "axios";
 
 export class Http {
   private static HttpConfig = {
-    baseUrl: '/',
-    unAuthority: '403'  // 未授权状态码
+    baseUrl: "/",
+    unAuthority: "403", // 未授权状态码
   };
 
   /** 异常拦截 */
@@ -32,32 +37,32 @@ export class Http {
   }
 
   static request<T>(config: AxiosRequestConfig): AxiosPromise<T> {
-    return this.axiosInstance.request(config)
+    return this.axiosInstance.request(config);
   }
 
   static get = <T, D>(
     url: string,
     params?: D,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ): AxiosPromise<T> => {
     return Http.request({
-      method: 'GET',
+      method: "GET",
       url,
       params,
-      ...config
+      ...config,
     });
   };
 
   static post = <T, D>(
     url: string,
     data?: D,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ): AxiosPromise<T> => {
     return Http.request({
-      method: 'POST',
+      method: "POST",
       url,
       data,
-      ...config
+      ...config,
     });
   };
 
@@ -70,7 +75,7 @@ export class Http {
     // 请求拦截器（添加token）
     this.axiosInstance.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('accessToken');
+        const token = localStorage.getItem("accessToken");
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -78,7 +83,7 @@ export class Http {
       },
       (error) => {
         return Promise.reject(error);
-      }
+      },
     );
 
     // 响应拦截器
@@ -88,24 +93,35 @@ export class Http {
         return new Promise((resolve) => {
           if (this.responseIntercepter) {
             const result = this.responseIntercepter(response);
-            resolve(result !== undefined ? result : response.data?.data || response.data);
+            resolve(
+              result !== undefined
+                ? result
+                : response.data?.data || response.data,
+            );
           } else {
             resolve(response.data?.data || response.data);
           }
         });
       },
       async (error: AxiosError) => {
-        const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+        const originalRequest = error.config as AxiosRequestConfig & {
+          _retry?: boolean;
+        };
 
         // 检查是否是未授权错误
-        const isUnAuth = error.response?.status === 401 ||
+        const isUnAuth =
+          error.response?.status === 401 ||
           error.code === this.HttpConfig.unAuthority;
 
         if (isUnAuth && !originalRequest._retry) {
           // 如果正在刷新token，将请求加入队列
           if (this.isRefreshing) {
             return new Promise((resolve, reject) => {
-              this.requestQueue.push({ resolve, reject, config: originalRequest });
+              this.requestQueue.push({
+                resolve,
+                reject,
+                config: originalRequest,
+              });
             });
           }
 
@@ -117,7 +133,7 @@ export class Http {
             const newToken = await this.refreshToken();
 
             // 更新localStorage中的token
-            localStorage.setItem('accessToken', newToken);
+            localStorage.setItem("accessToken", newToken);
 
             // 重试队列中的所有请求
             this.requestQueue.forEach(({ resolve, reject, config }) => {
@@ -127,9 +143,7 @@ export class Http {
               } else {
                 config.headers = { Authorization: `Bearer ${newToken}` };
               }
-              this.axiosInstance.request(config)
-                .then(resolve)
-                .catch(reject);
+              this.axiosInstance.request(config).then(resolve).catch(reject);
             });
             this.requestQueue = [];
 
@@ -143,8 +157,8 @@ export class Http {
             this.requestQueue = [];
 
             // 清除本地token
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
 
             // 调用异常拦截器
             if (this.exceptionIntercepter) {
@@ -162,25 +176,26 @@ export class Http {
           this.exceptionIntercepter(error);
         }
         return Promise.reject(error);
-      }
+      },
     );
   }
 
   // 刷新token的方法
   private static async refreshToken(): Promise<string> {
-    const refreshToken = localStorage.getItem('refreshToken');
+    const refreshToken = localStorage.getItem("refreshToken");
     if (!refreshToken) {
-      throw new Error('No refresh token');
+      throw new Error("No refresh token");
     }
 
     try {
-      const response = await this.axiosInstance.post('/auth/refresh', {
-        refreshToken: refreshToken
+      const response = await this.axiosInstance.post("/auth/refresh", {
+        refreshToken: refreshToken,
       });
 
-      const newAccessToken = response.data?.data?.accessToken || response.data?.accessToken;
+      const newAccessToken =
+        response.data?.data?.accessToken || response.data?.accessToken;
       if (!newAccessToken) {
-        throw new Error('Refresh failed');
+        throw new Error("Refresh failed");
       }
 
       return newAccessToken;

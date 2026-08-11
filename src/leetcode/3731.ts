@@ -4,13 +4,13 @@
 // 返回一个 有序 列表，包含该范围内缺失的所有整数，并 按从小到大排序。如果没有缺失的整数，返回一个 空 列表。
 function findMiss(nums: number[]): number[] {
   nums.sort((a, b) => a - b);
-  
+
   const numSet = new Set(nums);
   const res: number[] = [];
-  
+
   for (let i = nums[0] + 1; i < nums[nums.length - 1]; i++) {
     if (!numSet.has(i)) res.push(i);
   }
-  
+
   return res;
 }

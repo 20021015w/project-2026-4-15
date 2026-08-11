@@ -1,64 +1,76 @@
-import { useAppDispatch, useAppSelector } from "@/app/hook"
-import { addList, deleteTodo, deleteTodos, done, todoList } from '@/features/list/listSlice'
-import { ListBase } from "@/features/list/type"
-import { DeleteFilled, DeleteOutlined } from "@ant-design/icons"
-import { Button, Checkbox, Input, List, Popconfirm, Space } from "antd"
-import { useCallback, useMemo, useRef, useState } from "react"
-import { Outlet } from "react-router-dom"
-import styles from './index.less'
- const ListTodo = () => {
-  const dispatch = useAppDispatch()
+import { useAppDispatch, useAppSelector } from "@/app/hook";
+import {
+  addList,
+  deleteTodo,
+  deleteTodos,
+  done,
+  todoList,
+} from "@/features/list/listSlice";
+import { ListBase } from "@/features/list/type";
+import { DeleteFilled, DeleteOutlined } from "@ant-design/icons";
+import { Button, Checkbox, Input, List, Popconfirm, Space } from "antd";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Outlet } from "react-router-dom";
+import styles from "./index.less";
+const ListTodo = () => {
+  const dispatch = useAppDispatch();
   const dataSource = useAppSelector(todoList)
     .slice()
-    .sort((a, b) => a.displayIndex - b.displayIndex)
-  console.log(dataSource)
-  const [inputValue, setInputValue] = useState<string>('')
-  const inputRef = useRef<any>(null)
-  const [isEditing, setIsEditing] = useState<boolean>(false)
-  
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  
-  const selectedCount = useMemo(() => selectedIds.size, [selectedIds])
-  
-  const onToggle = useCallback((id: string) => {
-    dispatch(done(id))
-  }, [dispatch])
-  
-  const onDelete = useCallback((id: string) => {
-    dispatch(deleteTodo(id))
-    setSelectedIds(prev => {
-      const newSet = new Set(prev)
-      newSet.delete(id)
-      return newSet
-    })
-  }, [dispatch])
-  
+    .sort((a, b) => a.displayIndex - b.displayIndex);
+  console.log(dataSource);
+  const [inputValue, setInputValue] = useState<string>("");
+  const inputRef = useRef<any>(null);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const selectedCount = useMemo(() => selectedIds.size, [selectedIds]);
+
+  const onToggle = useCallback(
+    (id: string) => {
+      dispatch(done(id));
+    },
+    [dispatch],
+  );
+
+  const onDelete = useCallback(
+    (id: string) => {
+      dispatch(deleteTodo(id));
+      setSelectedIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    },
+    [dispatch],
+  );
+
   const onBatchDelete = useCallback(() => {
-    if (selectedIds.size === 0) return
-    dispatch(deleteTodos(Array.from(selectedIds)))
-    setSelectedIds(new Set()) // 清空选中
-  }, [dispatch, selectedIds])
-  
+    if (selectedIds.size === 0) return;
+    dispatch(deleteTodos(Array.from(selectedIds)));
+    setSelectedIds(new Set()); // 清空选中
+  }, [dispatch, selectedIds]);
+
   const onSelectAll = useCallback(() => {
     if (selectedIds.size === dataSource.length) {
-      setSelectedIds(new Set()) // 全部取消
+      setSelectedIds(new Set()); // 全部取消
     } else {
-      setSelectedIds(new Set(dataSource.map(item => item.id))) // 全部选中
+      setSelectedIds(new Set(dataSource.map((item) => item.id))); // 全部选中
     }
-  }, [dataSource, selectedIds])
-  
+  }, [dataSource, selectedIds]);
+
   const onSelectItem = useCallback((id: string, checked: boolean) => {
-    setSelectedIds(prev => {
-      const newSet = new Set(prev)
+    setSelectedIds((prev) => {
+      const newSet = new Set(prev);
       if (checked) {
-        newSet.add(id)
+        newSet.add(id);
       } else {
-        newSet.delete(id)
+        newSet.delete(id);
       }
-      return newSet
-    })
-  }, [])
-  
+      return newSet;
+    });
+  }, []);
+
   // ✅ 失焦时添加
   const handleBlur = useCallback(() => {
     if (inputValue.trim()) {
@@ -66,38 +78,42 @@ import styles from './index.less'
         id: Date.now().toString(),
         listInfo: inputValue.trim(),
         isDone: false,
-        displayIndex: dataSource.length
-      }
-      dispatch(addList(newItem))
+        displayIndex: dataSource.length,
+      };
+      dispatch(addList(newItem));
     }
-    setIsEditing(false)
-    setInputValue('')
-  }, [inputValue, dataSource.length, dispatch])
-  
+    setIsEditing(false);
+    setInputValue("");
+  }, [inputValue, dataSource.length, dispatch]);
+
   // ✅ 点击添加按钮
   const handleAddClick = useCallback(() => {
-    setIsEditing(true)
+    setIsEditing(true);
     setTimeout(() => {
-      inputRef.current?.focus?.()
-    }, 0)
-  }, [])
-  
+      inputRef.current?.focus?.();
+    }, 0);
+  }, []);
+
   return (
     <div className={styles.container}>
       <div className={styles.list}>
         <Space>
-          <Checkbox 
+          <Checkbox
             onChange={onSelectAll}
-            checked={selectedIds.size === dataSource.length && dataSource.length > 0}
-            indeterminate={selectedIds.size > 0 && selectedIds.size < dataSource.length}
+            checked={
+              selectedIds.size === dataSource.length && dataSource.length > 0
+            }
+            indeterminate={
+              selectedIds.size > 0 && selectedIds.size < dataSource.length
+            }
           >
-            {selectedIds.size === dataSource.length ? '取消全选' : '全选'}
+            {selectedIds.size === dataSource.length ? "取消全选" : "全选"}
           </Checkbox>
           <span className={styles.selectOption}>
-            {selectedCount > 0 ? `已选中 ${selectedCount} 项` : ''}
+            {selectedCount > 0 ? `已选中 ${selectedCount} 项` : ""}
           </span>
         </Space>
-        
+
         {selectedCount > 0 && (
           <Popconfirm
             title={`确定要删除选中的 ${selectedCount} 个待办吗？`}
@@ -105,11 +121,7 @@ import styles from './index.less'
             okText="确定"
             cancelText="取消"
           >
-            <Button 
-              type="primary" 
-              danger 
-              icon={<DeleteFilled />}
-            >
+            <Button type="primary" danger icon={<DeleteFilled />}>
               批量删除 ({selectedCount})
             </Button>
           </Popconfirm>
@@ -123,53 +135,55 @@ import styles from './index.less'
           <List.Item
             key={item.id}
             style={{
-              background: selectedIds.has(item.id) ? '#e6f7ff' : 'white',
-              transition: 'background 0.3s',
+              background: selectedIds.has(item.id) ? "#e6f7ff" : "white",
+              transition: "background 0.3s",
               borderRadius: 4,
-              marginBottom: 4
+              marginBottom: 4,
             }}
             actions={[
               <Space>
-                <Checkbox 
+                <Checkbox
                   checked={item.isDone}
                   onChange={() => onToggle(item.id)}
                 >
                   完成
                 </Checkbox>
-                
-                <Checkbox 
+
+                <Checkbox
                   checked={selectedIds.has(item.id)}
                   onChange={(e) => onSelectItem(item.id, e.target.checked)}
                 />
-                
+
                 <Popconfirm
                   title="确定要删除这个待办吗？"
                   onConfirm={() => onDelete(item.id)}
                   okText="确定"
                   cancelText="取消"
                 >
-                  <Button 
-                    type="text" 
-                    danger 
+                  <Button
+                    type="text"
+                    danger
                     size="small"
                     icon={<DeleteOutlined />}
                   />
                 </Popconfirm>
-              </Space>
+              </Space>,
             ]}
           >
             <List.Item.Meta
               title={
-                <span style={{ 
-                  textDecoration: item.isDone ? 'line-through' : 'none',
-                  color: item.isDone ? '#52c41a' : 'rgba(0, 0, 0, 0.85)',
-                  fontWeight: item.isDone ? 'normal' : 500
-                }}>
+                <span
+                  style={{
+                    textDecoration: item.isDone ? "line-through" : "none",
+                    color: item.isDone ? "#52c41a" : "rgba(0, 0, 0, 0.85)",
+                    fontWeight: item.isDone ? "normal" : 500,
+                  }}
+                >
                   {item.listInfo}
                 </span>
               }
               description={
-                <span style={{ fontSize: 12, color: '#999' }}>
+                <span style={{ fontSize: 12, color: "#999" }}>
                   ID: {item.id.slice(-4)} • 序号: {item.displayIndex}
                 </span>
               }
@@ -177,7 +191,7 @@ import styles from './index.less'
           </List.Item>
         )}
       />
-      
+
       {/* 添加待办区域 */}
       {isEditing ? (
         <div style={{ marginTop: 16 }}>
@@ -188,11 +202,18 @@ import styles from './index.less'
             onBlur={handleBlur}
             onPressEnter={handleBlur}
             placeholder="请输入待办事项，失焦或回车保存"
-            style={{ width: '100%' }}
+            style={{ width: "100%" }}
             autoFocus
             allowClear
           />
-          <div style={{ marginTop: 8, display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <div
+            style={{
+              marginTop: 8,
+              display: "flex",
+              gap: 8,
+              justifyContent: "flex-end",
+            }}
+          >
             <Button size="small" onClick={() => setIsEditing(false)}>
               取消
             </Button>
@@ -202,8 +223,8 @@ import styles from './index.less'
           </div>
         </div>
       ) : (
-        <Button 
-          type="primary" 
+        <Button
+          type="primary"
           onClick={handleAddClick}
           style={{ marginTop: 16 }}
           block
@@ -213,6 +234,6 @@ import styles from './index.less'
       )}
       <Outlet />
     </div>
-  )
-}
-export default ListTodo
+  );
+};
+export default ListTodo;

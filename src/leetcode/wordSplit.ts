@@ -5,17 +5,17 @@
 // 输出: true
 // 解释: 返回 true 因为 "leetcode" 可以由 "leet" 和 "code" 拼接成。
 function wordBreak(s: string, wordDict: string[]): boolean {
-    const dp:boolean[] = Array.from({length:s.length + 1},() => false)
-    dp[0] = true
-    const wordSet = new Set(wordDict)
-    for(let i =0 ; i<= s.length;i++){
-      for(let j = 0; j<i;j++){
-        if (dp[j] && wordSet.has(s.substring(j, i))) {
-                dp[i] = true;
-                break;
-            }
+  const dp: boolean[] = Array.from({ length: s.length + 1 }, () => false);
+  dp[0] = true;
+  const wordSet = new Set(wordDict);
+  for (let i = 0; i <= s.length; i++) {
+    for (let j = 0; j < i; j++) {
+      if (dp[j] && wordSet.has(s.substring(j, i))) {
+        dp[i] = true;
+        break;
       }
     }
-    return dp[s.length ]
-};
-console.log(wordBreak('aaaaaaa',['aaaa','aaa']))
+  }
+  return dp[s.length];
+}
+console.log(wordBreak("aaaaaaa", ["aaaa", "aaa"]));

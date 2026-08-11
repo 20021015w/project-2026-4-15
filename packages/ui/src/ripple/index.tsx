@@ -1,5 +1,5 @@
-import { FC, useEffect, useRef } from 'react';
-import styles from './index.module.less';
+import { FC, useEffect, useRef } from "react";
+import styles from "./index.module.less";
 
 export interface ERippleProps {
   color?: string;
@@ -9,7 +9,7 @@ export interface ERippleProps {
 }
 
 export const Ripple: FC<ERippleProps> = ({
-  color = 'rgba(0,0,0,0.1)',
+  color = "rgba(0,0,0,0.1)",
   duration = 450,
   children,
   range = 30,
@@ -24,7 +24,7 @@ export const Ripple: FC<ERippleProps> = ({
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
-      const ripple = document.createElement('span');
+      const ripple = document.createElement("span");
       ripple.classList.add(styles.rippleItem);
 
       // 动态样式
@@ -41,7 +41,7 @@ export const Ripple: FC<ERippleProps> = ({
 
         ripple.style.width = `${finalSize}px`;
         ripple.style.height = `${finalSize}px`;
-        ripple.style.opacity = '0';
+        ripple.style.opacity = "0";
       });
 
       setTimeout(() => {
@@ -50,10 +50,10 @@ export const Ripple: FC<ERippleProps> = ({
     };
 
     const el = containerRef.current;
-    el?.addEventListener('pointerdown', handlePointerDown);
+    el?.addEventListener("pointerdown", handlePointerDown);
 
     return () => {
-      el?.removeEventListener('pointerdown', handlePointerDown);
+      el?.removeEventListener("pointerdown", handlePointerDown);
     };
   }, [color, duration, range]);
 

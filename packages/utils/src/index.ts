@@ -1,4 +1,3 @@
-export * from './func/index';
-export * from './https/https';
-export * from './localStorage';
-
+export * from "./func/index";
+export * from "./https/https";
+export * from "./localStorage";

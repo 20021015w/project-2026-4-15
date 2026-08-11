@@ -1,21 +1,21 @@
 class MyPromise {
   private value: any;
   private reason: any;
-  private state: 'fulfilled' | 'pending' | 'rejected' = 'pending';
+  private state: "fulfilled" | "pending" | "rejected" = "pending";
   private fulfilCallBacks: Function[] = [];
   private rejectCallBacks: Function[] = [];
 
   constructor(excetor: (resolve: Function, reject: Function) => void) {
     const resolve = (value: any) => {
-      if (this.state === 'pending') {
-        this.state = 'fulfilled';
+      if (this.state === "pending") {
+        this.state = "fulfilled";
         this.value = value;
         this.fulfilCallBacks.forEach((cb) => cb(this.value));
       }
     };
     const reject = (reason: any) => {
-      if (this.state === 'pending') {
-        this.state = 'rejected';
+      if (this.state === "pending") {
+        this.state = "rejected";
         this.reason = reason;
         this.rejectCallBacks.forEach((cb) => cb(this.reason));
       }
@@ -29,8 +29,14 @@ class MyPromise {
 
   then(onFulfiled?: Function, onRejected?: Function) {
     // 值的穿透
-    onFulfiled = typeof onFulfiled === 'function' ? onFulfiled : (value: any) => value;
-    onRejected = typeof onRejected === 'function' ? onRejected : (reason: any) => { throw reason };
+    onFulfiled =
+      typeof onFulfiled === "function" ? onFulfiled : (value: any) => value;
+    onRejected =
+      typeof onRejected === "function"
+        ? onRejected
+        : (reason: any) => {
+            throw reason;
+          };
 
     return new MyPromise((resolve, reject) => {
       const handleFulfiled = () => {
@@ -57,7 +63,7 @@ class MyPromise {
             if (result instanceof MyPromise) {
               result.then(resolve, reject);
             } else {
-              resolve(result);  // 注意：rejected 回调中返回非错误值会转为 resolve
+              resolve(result); // 注意：rejected 回调中返回非错误值会转为 resolve
             }
           } catch (error) {
             reject(error);
@@ -65,14 +71,14 @@ class MyPromise {
         }, 0);
       };
 
-      if (this.state === 'pending') {
+      if (this.state === "pending") {
         this.fulfilCallBacks.push(() => handleFulfiled());
         this.rejectCallBacks.push(() => handleRejected());
       }
-      if (this.state === 'fulfilled') {
+      if (this.state === "fulfilled") {
         handleFulfiled();
       }
-      if (this.state === 'rejected') {
+      if (this.state === "rejected") {
         handleRejected();
       }
     });

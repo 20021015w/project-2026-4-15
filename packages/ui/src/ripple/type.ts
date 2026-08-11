@@ -15,5 +15,5 @@ export type ERippleProps = {
    * 子元素
    */
   children: ReactNode;
-  range?:number
-}
+  range?: number;
+};

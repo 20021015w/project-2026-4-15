@@ -10,7 +10,7 @@ order: 1
 ## 基本用法
 
 ```jsx
-import { Button } from './index';
+import { Button } from "./index";
 
 export default () => (
   <div>
@@ -24,7 +24,7 @@ export default () => (
 ## 不同尺寸
 
 ```jsx
-import { Button } from './index';
+import { Button } from "./index";
 
 export default () => (
   <div>
@@ -37,9 +37,9 @@ export default () => (
 
 ## API
 
-| 属性 | 说明 | 类型 | 默认值 |
-| --- | --- | --- | --- |
-| type | 按钮类型 | `primary` \| `default` \| `danger` | `default` |
-| size | 按钮尺寸 | `small` \| `medium` \| `large` | `medium` |
-| onClick | 点击事件 | `() => void` | - |
-| children | 按钮内容 | `React.ReactNode` | - |
+| 属性     | 说明     | 类型                               | 默认值    |
+| -------- | -------- | ---------------------------------- | --------- |
+| type     | 按钮类型 | `primary` \| `default` \| `danger` | `default` |
+| size     | 按钮尺寸 | `small` \| `medium` \| `large`     | `medium`  |
+| onClick  | 点击事件 | `() => void`                       | -         |
+| children | 按钮内容 | `React.ReactNode`                  | -         |

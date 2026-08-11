@@ -1,11 +1,11 @@
 // utils/modalHelper.tsx
-import type { ModalProps } from 'antd';
-import { Modal } from 'antd';
-import { createRoot } from 'react-dom/client';
+import type { ModalProps } from "antd";
+import { Modal } from "antd";
+import { createRoot } from "react-dom/client";
 
 // 扩展 ModalProps，添加 content 字段方便使用
 export interface OpenModalOptions extends ModalProps {
-  content: React.ReactNode;  // 弹窗内容
+  content: React.ReactNode; // 弹窗内容
 }
 
 // Modal 实例类型
@@ -20,60 +20,55 @@ let idCounter = 0;
 
 // 生成唯一 ID
 const generateId = (title?: string): string => {
-  return `${title || 'modal'}_${Date.now()}_${++idCounter}`;
+  return `${title || "modal"}_${Date.now()}_${++idCounter}`;
 };
 
 // 打开 Modal
 export const openModal = (options: OpenModalOptions): string => {
-  const div = document.createElement('div');
-  const id = generateId('wslModal');
+  const div = document.createElement("div");
+  const id = generateId("wslModal");
   const zIndex = 1000 + modalStack.length;
-  
+
   document.body.appendChild(div);
   const root = createRoot(div);
-  
+
   let isClosed = false;
   let isOpen = true;
-  
+
   const { content, ...modalProps } = options;
-  
+
   const destroy = () => {
     if (isClosed) return;
     isClosed = true;
-    
+
     // 从栈中移除
-    const index = modalStack.findIndex(item => item.id === id);
+    const index = modalStack.findIndex((item) => item.id === id);
     if (index !== -1) {
       modalStack.splice(index, 1);
     }
-    
+
     // 清理 DOM
     setTimeout(() => {
       root.unmount();
       div.remove();
-    }, 300); 
-    
+    }, 300);
+
     // 触发关闭回调
     options.afterClose?.();
   };
-  
+
   const close = () => {
     if (!isOpen) return;
     isOpen = false;
-    
+
     // 重新渲染 Modal，将 open 设置为 false
     root.render(
-      <Modal
-        {...modalProps}
-        open={false}
-        zIndex={zIndex}
-        afterClose={destroy}
-      >
+      <Modal {...modalProps} open={false} zIndex={zIndex} afterClose={destroy}>
         {content}
-      </Modal>
+      </Modal>,
     );
   };
-  
+
   // 渲染 Modal
   root.render(
     <Modal
@@ -85,18 +80,18 @@ export const openModal = (options: OpenModalOptions): string => {
       onOk={close}
     >
       {content}
-    </Modal>
+    </Modal>,
   );
-  
+
   const instance: ModalInstance = { id, destroy: close };
   modalStack.push(instance);
-  
+
   return id;
 };
 
 // 关闭指定 Modal
 export const closeModal = (id: string) => {
-  const index = modalStack.findIndex(item => item.id === id);
+  const index = modalStack.findIndex((item) => item.id === id);
   if (index !== -1) {
     modalStack[index].destroy();
     modalStack.splice(index, 1);
@@ -137,7 +132,7 @@ export const getModalCount = (): number => {
 
 // 获取所有打开的 Modal ID
 export const getModalIds = (): string[] => {
-  return modalStack.map(modal => modal.id);
+  return modalStack.map((modal) => modal.id);
 };
 
 // 判断是否有 Modal 打开

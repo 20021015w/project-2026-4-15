@@ -7,5 +7,5 @@
 // 输入：s = "cbbd"
 // 输出："bb"
 function longestPalindrome(s: string): string {
-  return ''
-};
+  return "";
+}

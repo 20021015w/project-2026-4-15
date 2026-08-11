@@ -1,6 +1,6 @@
 // ArrayUtil.ts
- type SortableValue = string | number | Date | null | undefined;
- class ArrayUtils {
+type SortableValue = string | number | Date | null | undefined;
+class ArrayUtils {
   /**
    * 数组转Map
    * @param arr 原数组
@@ -8,24 +8,24 @@
    * @param valueField 作为value的字段名（可选，不传则返回整个item）
    * @returns Map对象
    */
-    static arrayToMap<T, K extends keyof T>(
+  static arrayToMap<T, K extends keyof T>(
     arr: T[],
     keyField?: K,
-    valueField?: keyof T
+    valueField?: keyof T,
   ): Map<any, any> {
     const map = new Map();
-    
+
     arr.forEach((item, index) => {
       // 默认使用下标作为key
       const key = keyField ? item[keyField] : index;
-      
+
       if (valueField) {
         map.set(key, item[valueField]);
       } else {
         map.set(key, item);
       }
     });
-    
+
     return map;
   }
 
@@ -39,11 +39,11 @@
   static arrayToObject<T, K extends keyof T, V extends keyof T>(
     arr: T[],
     keyField: K,
-    valueField?: V
+    valueField?: V,
   ): Record<string | number | symbol, V extends undefined ? T : T[V]> {
     const obj: Record<string | number | symbol, any> = {};
-    
-    arr.forEach(item => {
+
+    arr.forEach((item) => {
       const key = item[keyField] as string | number | symbol;
       if (valueField) {
         obj[key] = item[valueField];
@@ -51,7 +51,7 @@
         obj[key] = item;
       }
     });
-    
+
     return obj;
   }
 
@@ -66,38 +66,38 @@
   static sortByField<T>(
     arr: T[],
     field: keyof T,
-    order: 'asc' | 'desc' = 'asc',
-    type: 'string' | 'number' | 'date' = 'string'
+    order: "asc" | "desc" = "asc",
+    type: "string" | "number" | "date" = "string",
   ): T[] {
     const sortedArr = [...arr];
-    
+
     return sortedArr.sort((a, b) => {
       let valueA = a[field] as SortableValue;
-    let valueB = b[field] as SortableValue;
-      
+      let valueB = b[field] as SortableValue;
+
       // 处理空值
       if (valueA === undefined || valueA === null) return 1;
       if (valueB === undefined || valueB === null) return -1;
-      
+
       // 根据类型排序
       switch (type) {
-        case 'number':
+        case "number":
           valueA = Number(valueA);
           valueB = Number(valueB);
           break;
-        case 'date':
+        case "date":
           valueA = new Date(valueA as any).getTime();
           valueB = new Date(valueB as any).getTime();
           break;
-        case 'string':
+        case "string":
         default:
           valueA = String(valueA).toLowerCase();
           valueB = String(valueB).toLowerCase();
           break;
       }
-      
-      if (valueA < valueB) return order === 'asc' ? -1 : 1;
-      if (valueA > valueB) return order === 'asc' ? 1 : -1;
+
+      if (valueA < valueB) return order === "asc" ? -1 : 1;
+      if (valueA > valueB) return order === "asc" ? 1 : -1;
       return 0;
     });
   }
@@ -112,41 +112,40 @@
     arr: T[],
     fields: Array<{
       field: keyof T;
-      order?: 'asc' | 'desc';
-      type?: 'string' | 'number' | 'date';
-    }>
+      order?: "asc" | "desc";
+      type?: "string" | "number" | "date";
+    }>,
   ): T[] {
-   
     const sortedArr = [...arr];
-    
+
     return sortedArr.sort((a, b) => {
-      for (const { field, order = 'asc', type = 'string' } of fields) {
-       let valueA = a[field] as SortableValue;
-    let valueB = b[field] as SortableValue;
-        
+      for (const { field, order = "asc", type = "string" } of fields) {
+        let valueA = a[field] as SortableValue;
+        let valueB = b[field] as SortableValue;
+
         // 处理空值
         if (valueA === undefined || valueA === null) return 1;
         if (valueB === undefined || valueB === null) return -1;
-        
+
         // 根据类型转换
         switch (type) {
-          case 'number':
+          case "number":
             valueA = Number(valueA);
             valueB = Number(valueB);
             break;
-          case 'date':
+          case "date":
             valueA = new Date(valueA as any).getTime();
             valueB = new Date(valueB as any).getTime();
             break;
-          case 'string':
+          case "string":
           default:
             valueA = String(valueA).toLowerCase();
             valueB = String(valueB).toLowerCase();
             break;
         }
-        
-        if (valueA < valueB) return order === 'asc' ? -1 : 1;
-        if (valueA > valueB) return order === 'asc' ? 1 : -1;
+
+        if (valueA < valueB) return order === "asc" ? -1 : 1;
+        if (valueA > valueB) return order === "asc" ? 1 : -1;
       }
       return 0;
     });
@@ -161,17 +160,17 @@
   static arrayToTree<T extends Record<string, any>>(
     arr: T[],
     options: {
-      idField?: string;        // ID字段名，默认 'id'
-      parentIdField?: string;  // 父ID字段名，默认 'parentId'
-      childrenField?: string;  // 子节点字段名，默认 'children'
-      rootId?: any;           // 根节点ID，默认 null 或 0
-    } = {}
+      idField?: string; // ID字段名，默认 'id'
+      parentIdField?: string; // 父ID字段名，默认 'parentId'
+      childrenField?: string; // 子节点字段名，默认 'children'
+      rootId?: any; // 根节点ID，默认 null 或 0
+    } = {},
   ): T[] {
     const {
-      idField = 'id',
-      parentIdField = 'parentId',
-      childrenField = 'children',
-      rootId = null
+      idField = "id",
+      parentIdField = "parentId",
+      childrenField = "children",
+      rootId = null,
     } = options;
 
     // 创建ID到节点的映射
@@ -179,15 +178,15 @@
     const tree: T[] = [];
 
     // 初始化所有节点
-    arr.forEach(item => {
+    arr.forEach((item) => {
       nodeMap.set(item[idField], { ...item, [childrenField]: [] });
     });
 
     // 构建树
-    arr.forEach(item => {
+    arr.forEach((item) => {
       const node = nodeMap.get(item[idField]);
       const parentId = item[parentIdField];
-      
+
       if (parentId === rootId || parentId === undefined || parentId === null) {
         // 根节点
         //@ts-ignore
@@ -220,21 +219,21 @@
       idField?: string;
       parentIdField?: string;
       rootId?: any;
-      levelField?: string;    // 层级字段名，默认 'level'
-    } = {}
+      levelField?: string; // 层级字段名，默认 'level'
+    } = {},
   ): (T & { level: number })[] {
     const {
-      idField = 'id',
-      parentIdField = 'parentId',
+      idField = "id",
+      parentIdField = "parentId",
       rootId = null,
-      levelField = 'level'
+      levelField = "level",
     } = options;
 
     const result: (T & { level: number })[] = [];
-    
+
     // 创建映射
     const itemMap = new Map<any, T & { level: number }>();
-    arr.forEach(item => {
+    arr.forEach((item) => {
       itemMap.set(item[idField], { ...item, level: 0 });
     });
 
@@ -242,9 +241,11 @@
     const setLevel = (item: any, level: number) => {
       item[levelField] = level;
       result.push(item);
-      
-      const children = arr.filter(child => child[parentIdField] === item[idField]);
-      children.forEach(child => {
+
+      const children = arr.filter(
+        (child) => child[parentIdField] === item[idField],
+      );
+      children.forEach((child) => {
         const childItem = itemMap.get(child[idField]);
         if (childItem) {
           setLevel(childItem, level + 1);
@@ -254,8 +255,8 @@
 
     // 处理根节点
     arr
-      .filter(item => item[parentIdField] === rootId)
-      .forEach(item => {
+      .filter((item) => item[parentIdField] === rootId)
+      .forEach((item) => {
         const rootItem = itemMap.get(item[idField]);
         if (rootItem) {
           setLevel(rootItem, 0);
@@ -273,12 +274,12 @@
    */
   static treeToArray<T extends Record<string, any>>(
     tree: T[],
-    childrenField: string = 'children'
+    childrenField: string = "children",
   ): T[] {
     const result: T[] = [];
-    
+
     const flatten = (nodes: T[]) => {
-      nodes.forEach(node => {
+      nodes.forEach((node) => {
         const { [childrenField]: children, ...rest } = node;
         result.push(rest as T);
         if (children && Array.isArray(children)) {
@@ -286,7 +287,7 @@
         }
       });
     };
-    
+
     flatten(tree);
     return result;
   }

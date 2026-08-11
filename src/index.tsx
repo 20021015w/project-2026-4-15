@@ -3,7 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./styles/globals.css";
-import './styles/reset.css';
+import "./styles/reset.css";
 // 仅在开发环境引入mock服务
 if (process.env.NODE_ENV === "development") {
   import("./mock");

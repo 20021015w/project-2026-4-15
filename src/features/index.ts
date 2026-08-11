@@ -1,5 +1,4 @@
-export * from './conter/counterSlice'
-export * from './list/listSlice'
-export * from './todos/todoSlice'
-export * from './userInfo/userInfoSlice'
-
+export * from "./conter/counterSlice";
+export * from "./list/listSlice";
+export * from "./todos/todoSlice";
+export * from "./userInfo/userInfoSlice";

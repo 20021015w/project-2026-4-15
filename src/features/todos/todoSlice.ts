@@ -1,3 +1,1 @@
-export const todo = () => {
-  
-}
+export const todo = () => {};

@@ -16,7 +16,7 @@ function mergeSort(head: ListNode | null): ListNode | null {
   // 使用快慢指针找到中间节点
   let slow: ListNode | null = head;
   let fast: ListNode | null = head.next;
-  
+
   while (fast !== null && fast.next !== null) {
     slow = slow!.next;
     fast = fast.next.next;
@@ -34,10 +34,13 @@ function mergeSort(head: ListNode | null): ListNode | null {
   return mergeTwoLists(left, right);
 }
 
-function mergeTwoLists(L1: ListNode | null, L2: ListNode | null): ListNode | null {
+function mergeTwoLists(
+  L1: ListNode | null,
+  L2: ListNode | null,
+): ListNode | null {
   const dummy = new ListNode(0);
   let current = dummy;
-  
+
   while (L1 !== null && L2 !== null) {
     if (L1.val <= L2.val) {
       current.next = L1;
@@ -48,7 +51,7 @@ function mergeTwoLists(L1: ListNode | null, L2: ListNode | null): ListNode | nul
     }
     current = current.next;
   }
-  
+
   current.next = L1 !== null ? L1 : L2;
   return dummy.next;
 }
@@ -73,12 +76,14 @@ function printLinkedList(head: ListNode | null): void {
     result.push(current.val);
     current = current.next;
   }
-  console.log(result.join(' -> '));
+  console.log(result.join(" -> "));
 }
 
 // 测试
-const head = createLinkedList([4, 9, 3, 2,3,4,5,6,3,4,2,3,2345,345,2,34,2312,34,3,2, 1, 10]);
-console.dir(head,{depth:null});
+const head = createLinkedList([
+  4, 9, 3, 2, 3, 4, 5, 6, 3, 4, 2, 3, 2345, 345, 2, 34, 2312, 34, 3, 2, 1, 10,
+]);
+console.dir(head, { depth: null });
 
 const sorted = mergeSort(head);
-console.dir(sorted,{depth:null});
+console.dir(sorted, { depth: null });

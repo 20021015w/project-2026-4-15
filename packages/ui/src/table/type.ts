@@ -1,13 +1,17 @@
 import { BaseTableProps } from "ali-react-table";
 
 /** 选择类型 */
-export type NormalTableSelectionType = 'single' | 'multiple';
+export type NormalTableSelectionType = "single" | "multiple";
 
 /** 点击响应区域 */
-export type NormalTableSelectionClickArea = 'radio' | 'checkbox' | 'cell' | 'row';
+export type NormalTableSelectionClickArea =
+  | "radio"
+  | "checkbox"
+  | "cell"
+  | "row";
 
 /** 选择框所在列的位置 */
-export type NormalTableSelectionPlacement = 'start' | 'end';
+export type NormalTableSelectionPlacement = "start" | "end";
 
 /**
  * 行选择配置
@@ -24,7 +28,12 @@ export interface INormalTableSelection {
   /** 选中值变化回调 */
   onChange?:
     | ((next: string) => void)
-    | ((next: string[], key: string, keys: string[], action: 'check' | 'uncheck' | 'check-all' | 'uncheck-all') => void);
+    | ((
+        next: string[],
+        key: string,
+        keys: string[],
+        action: "check" | "uncheck" | "check-all" | "uncheck-all",
+      ) => void);
   /** 选中时是否高亮该行 */
   highlightRowWhenSelected?: boolean;
   /** 判断一行是否禁用选择 */

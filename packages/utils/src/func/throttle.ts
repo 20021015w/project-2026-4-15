@@ -1,16 +1,16 @@
-export function useThrottle (fun:Function,delay:number):Function{
-  let lastTime = 0
+export function useThrottle(fun: Function, delay: number): Function {
+  let lastTime = 0;
   return (...args: any[]) => {
-    const now = new Date().getTime()
-    if(now - delay >= lastTime){
-      fun(...args)
+    const now = new Date().getTime();
+    if (now - delay >= lastTime) {
+      fun(...args);
     }
-    lastTime = now
-  }
+    lastTime = now;
+  };
 }
 export function useThrottleTimer(fun: Function, delay: number): Function {
   let timer: ReturnType<typeof setTimeout> | null = null;
-  
+
   return (...args: any[]) => {
     if (!timer) {
       timer = setTimeout(() => {
@@ -21,10 +21,10 @@ export function useThrottleTimer(fun: Function, delay: number): Function {
   };
 }
 
-export function useDebounce (fun: Function, delay: number):Function {
+export function useDebounce(fun: Function, delay: number): Function {
   let timer: ReturnType<typeof setTimeout> | null = null;
-  return(...args: any[]) => {
-    if(timer) clearTimeout(timer)
+  return (...args: any[]) => {
+    if (timer) clearTimeout(timer);
     if (!timer) {
       timer = setTimeout(() => {
         fun(...args);

@@ -9,13 +9,13 @@
 // 示例 2:
 // 输入：nums = [-1,-100,3,99], k = 2
 // 输出：[3,99,-1,-100]
-// 解释: 
+// 解释:
 // 向右轮转 1 步: [99,-1,-100,3]
 // 向右轮转 2 步: [3,99,-1,-100]
 function rotate(nums: number[], k: number): void {
   const rotateCount = k % nums.length;
   const removed = nums.splice(nums.length - rotateCount, rotateCount);
   nums.splice(0, 0, ...removed);
-  console.log(nums)
-};
-rotate([1,2,3,4,5,6,7],4)
+  console.log(nums);
+}
+rotate([1, 2, 3, 4, 5, 6, 7], 4);
