@@ -5,9 +5,10 @@ import { store } from './app/store';
 import AppRouter from './routers';
 
 function App() {
+  
   return (
     <Provider store={store}>
-      <ConfigProvider
+           <ConfigProvider
         locale={zhCN}
         theme={{
           token: {
