@@ -37,9 +37,19 @@ export default [
     rules: {
       "react/react-in-jsx-scope": "off",
       "@typescript-eslint/no-explicit-any": "warn",
+      // 关闭原生JS未使用变量规则，避免和TS规则冲突
+      "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": [
         "warn",
-        { argsIgnorePattern: "^_" },
+        {
+          // 函数参数以下划线开头则忽略（type里的函数参数、普通函数通用）
+          argsIgnorePattern: "^_",
+          // 泛型、类型变量以下划线开头忽略
+          varsIgnorePattern: "^_",
+          ignoreRestSiblings: true,
+          args: "after-used",
+          vars: "all",
+        },
       ],
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",

@@ -4,7 +4,9 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 const webpack = require("webpack");
 
+
 const isDevelopment = process.env.NODE_ENV === "development";
+
 
 module.exports = {
   mode: isDevelopment ? "development" : "production",
@@ -21,7 +23,6 @@ module.exports = {
     clean: true,
   },
 
-  // eval-cheap-module-source-map: 行级 source map，转译快，重新编译只重算出错行
   devtool: isDevelopment ? "eval-source-map" : "source-map",
 
   devServer: {
@@ -40,42 +41,38 @@ module.exports = {
       },
       progress: true,
     },
-    proxy: {
-      "/api": {
+    // ✅修复：proxy改为数组 + context，移除废弃的headers/logLevel配置
+    proxy: [
+      {
+        context: ["/api"],
         target: "http://localhost:3001",
-        changeOrigin: true, // 改变 Origin 头，解决跨域
-        secure: false, // 如果目标服务器是 HTTPS，设置为 true
-        ws: true, // 支持 WebSocket 代理
-        pathRewrite: {
-          // '^/api': '',          // 如果需要重写路径，取消注释
-        },
-        // 添加请求头
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-        },
-        // 代理日志
-        logLevel: "debug",
-        // 自定义代理行为
-        onProxyReq: (proxyReq, req, res) => {
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+        // pathRewrite: { "^/api": "" },
+
+        onProxyReq: (proxyReq, req) => {
           console.log(`[Proxy] ${req.method} ${req.url} -> ${proxyReq.path}`);
+          // 请求头在这里设置，不要写外层headers
+          // proxyReq.setHeader("xxx", "xxx")
         },
+
         onProxyRes: (proxyRes, req, res) => {
-          // 添加跨域响应头
-          proxyRes.headers["Access-Control-Allow-Origin"] = "*";
-          proxyRes.headers["Access-Control-Allow-Methods"] =
+          // 响应跨域头在这里设置
+          proxyRes.headers["Access‑Control‑Allow‑Origin"] = "*";
+          proxyRes.headers["Access‑Control‑Allow‑Methods"] =
             "GET, POST, PUT, DELETE, PATCH, OPTIONS";
-          proxyRes.headers["Access-Control-Allow-Headers"] =
-            "X-Requested-With, content-type, Authorization";
+          proxyRes.headers["Access‑Control‑Allow‑Headers"] =
+            "X‑Requested‑With, content‑type, Authorization";
         },
       },
-    },
-    // 允许跨域访问 devServer
+    ],
     allowedHosts: "all",
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-      "Access-Control-Allow-Headers":
-        "X-Requested-With, content-type, Authorization",
+      "Access‑Control‑Allow‑Origin": "*",
+      "Access‑Control‑Allow‑Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+      "Access‑Control‑Allow‑Headers":
+        "X‑Requested‑With, content‑type, Authorization",
     },
   },
 
@@ -89,7 +86,6 @@ module.exports = {
       "@hooks": path.resolve(__dirname, "src/hooks"),
     },
     fallback: {
-      // 如果遇到 polyfill 问题，可以添加
       // "path": require.resolve("path-browserify"),
     },
   },
@@ -98,8 +94,6 @@ module.exports = {
     rules: [
       {
         test: /\.[jt]sx?$/,
-        // 仅处理 src 与 packages（workspace 包经 symlink 解析后落在此处）
-        // 移除带负向断言的 exclude，正则求值更便宜
         include: [
           path.resolve(__dirname, "src"),
           path.resolve(__dirname, "packages"),
@@ -206,7 +200,6 @@ module.exports = {
   },
 
   plugins: [
-    // dev server 产物在内存中，无需清盘；生产构建由 output.clean 负责
     !isDevelopment && new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: "./public/index.html",
@@ -214,122 +207,106 @@ module.exports = {
       inject: "body",
       minify: !isDevelopment
         ? {
-            removeComments: true,
-            collapseWhitespace: true,
-            removeRedundantAttributes: true,
-            useShortDoctype: true,
-            removeEmptyAttributes: true,
-            removeStyleLinkTypeAttributes: true,
-            keepClosingSlash: true,
-            minifyJS: true,
-            minifyCSS: true,
-            minifyURLs: true,
-          }
+          removeComments: true,
+          collapseWhitespace: true,
+          removeRedundantAttributes: true,
+          useShortDoctype: true,
+          removeEmptyAttributes: true,
+          removeStyleLinkTypeAttributes: true,
+          keepClosingSlash: true,
+          minifyJS: true,
+          minifyCSS: true,
+          minifyURLs: true,
+        }
         : false,
     }),
     new webpack.DefinePlugin({
       "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
       "process.env.API_URL": JSON.stringify(
-        process.env.API_URL || "http://localhost:5000",
+        process.env.API_URL || "http://localhost:5000"
       ),
     }),
     isDevelopment && new ReactRefreshWebpackPlugin(),
     isDevelopment && new webpack.HotModuleReplacementPlugin(),
   ].filter(Boolean),
 
-  // 开发环境关闭 splitChunks / runtimeChunk，减少编译开销；生产环境保留完整分包
   optimization: isDevelopment
     ? {
-        splitChunks: false,
-        runtimeChunk: false,
-      }
+      splitChunks: false,
+      runtimeChunk: false,
+    }
     : {
-        splitChunks: {
-          chunks: "all",
-          cacheGroups: {
-            // 1. 最高优先级：antd UI 库（最大）
-            antd: {
-              test: /[\\/]node_modules[\\/](antd|@ant-design)[\\/]/,
-              name: "antd",
-              chunks: "all",
-              priority: 30,
-              enforce: true,
-            },
-
-            // 2. React 核心
-            react: {
-              test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
-              name: "react",
-              chunks: "all",
-              priority: 25,
-            },
-
-            // 3. Redux
-            redux: {
-              test: /[\\/]node_modules[\\/](@reduxjs|redux)[\\/]/,
-              name: "redux",
-              chunks: "all",
-              priority: 22,
-            },
-
-            // 4. 内部 workspace 包（通过 node_modules 软链接）
-            "@ui": {
-              test: /[\\/]node_modules[\\/]@ui[\\/]/,
-              name: "@ui",
-              chunks: "all",
-              priority: 20,
-            },
-            "@utils": {
-              test: /[\\/]node_modules[\\/]@utils[\\/]/,
-              name: "@utils",
-              chunks: "all",
-              priority: 20,
-            },
-            "@maxgraph": {
-              test: /[\\/]node_modules[\\/]@maxgraph[\\/]/,
-              name: "@maxgraph",
-              chunks: "all",
-              priority: 20,
-            },
-
-            // 5. 其他大库（可选）
-            lodash: {
-              test: /[\\/]node_modules[\\/]lodash[\\/]/,
-              name: "lodash",
-              chunks: "all",
-              priority: 18,
-            },
-
-            // 6. 剩下的 packages（源码中的，不是 node_modules）
-            packages: {
-              test: /[\\/]packages[\\/]/,
-              name: "packages",
-              chunks: "all",
-              priority: 8,
-              reuseExistingChunk: true,
-            },
-
-            // 7. 其他第三方库兜底（优先级最低）
-            vendors: {
-              test: /[\\/]node_modules[\\/]/,
-              name: "vendors",
-              chunks: "all",
-              priority: 5,
-            },
-
-            // 8. 公共业务代码
-            commons: {
-              name: "commons",
-              minChunks: 2,
-              chunks: "all",
-              priority: 0,
-              reuseExistingChunk: true,
-            },
+      splitChunks: {
+        chunks: "all",
+        cacheGroups: {
+          antd: {
+            test: /[\\/]node_modules[\\/](antd|@ant-design)[\\/]/,
+            name: "antd",
+            chunks: "all",
+            priority: 30,
+            enforce: true,
+          },
+          react: {
+            test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+            name: "react",
+            chunks: "all",
+            priority: 25,
+          },
+          redux: {
+            test: /[\\/]node_modules[\\/](@reduxjs|redux)[\\/]/,
+            name: "redux",
+            chunks: "all",
+            priority: 22,
+          },
+          "@ui": {
+            test: /[\\/]node_modules[\\/]@ui[\\/]/,
+            name: "@ui",
+            chunks: "all",
+            priority: 20,
+          },
+          "@utils": {
+            test: /[\\/]node_modules[\\/]@utils[\\/]/,
+            name: "@utils",
+            chunks: "all",
+            priority: 20,
+          },
+          "@maxgraph": {
+            test: /[\\/]node_modules[\\/]@maxgraph[\\/]/,
+            name: "@maxgraph",
+            chunks: "all",
+            priority: 20,
+          },
+          lodash: {
+            test: /[\\/]node_modules[\\/]lodash[\\/]/,
+            name: "lodash",
+            chunks: "all",
+            priority: 18,
+          },
+          packages: {
+            test: /[\\/]packages[\\/]/,
+            name: "packages",
+            chunks: "all",
+            priority: 8,
+            reuseExistingChunk: true,
+          },
+          vendors: {
+            test: /[\\/]node_modules[\\/]/,
+            name: "vendors",
+            chunks: "all",
+            priority: 5,
+          },
+          commons: {
+            name: "commons",
+            minChunks: 2,
+            chunks: "all",
+            priority: 0,
+            reuseExistingChunk: true,
           },
         },
-        runtimeChunk: "single",
-        minimize: true,
       },
+      runtimeChunk: "single",
+      minimize: true,
+    },
 
   cache: {
     type: "filesystem",
@@ -338,7 +315,6 @@ module.exports = {
     },
   },
 
-  // 开发环境忽略性能提示
   performance: {
     hints: isDevelopment ? false : "warning",
   },
