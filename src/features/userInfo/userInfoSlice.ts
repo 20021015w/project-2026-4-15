@@ -12,7 +12,7 @@ export const userInfoSlice = createSlice({
       LocalStorage.setLocal("accessToken", token);
       return { ...state, ...action.payload };
     },
-    clear: (state) => {
+    clear: () => {
       return { id: "", name: "", token: "" };
     },
   },

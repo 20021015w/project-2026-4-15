@@ -1,4 +1,4 @@
-function permutations(arr: string[]): string[][] {
+export function permutations(arr: string[]): string[][] {
   const result: string[][] = [];
   const path: string[] = [];
   const used: boolean[] = new Array(arr.length).fill(false);

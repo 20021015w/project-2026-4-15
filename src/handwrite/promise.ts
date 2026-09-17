@@ -1,24 +1,24 @@
-class MyPromise {
+type resolveType = (value: any) => void;
+type rejectType = (reason: any) => void;
+export class Wsl {
+  private state: "pending" | "resolve" | "reject" = "pending";
+  private fulfilCallBacks: Function[] = [];
+  private rejectedCallBacks: Function[] = [];
   private value: any;
   private reason: any;
-  private state: "fulfilled" | "pending" | "rejected" = "pending";
-  private fulfilCallBacks: Function[] = [];
-  private rejectCallBacks: Function[] = [];
-
-  constructor(excetor: (resolve: Function, reject: Function) => void) {
+  constructor(excetor: (resolve: resolveType, reject: rejectType) => void) {
     const resolve = (value: any) => {
-      if (this.state === "pending") {
-        this.state = "fulfilled";
-        this.value = value;
-        this.fulfilCallBacks.forEach((cb) => cb(this.value));
-      }
+      if (this.state !== "pending") return;
+      if (value === this) throw new TypeError("循环引用");
+      this.state = "resolve";
+      this.value = value;
+      this.fulfilCallBacks.forEach((cb) => cb());
     };
     const reject = (reason: any) => {
-      if (this.state === "pending") {
-        this.state = "rejected";
-        this.reason = reason;
-        this.rejectCallBacks.forEach((cb) => cb(this.reason));
-      }
+      if (this.state !== "pending") return;
+      this.state = "reject";
+      this.reason = reason;
+      this.rejectedCallBacks.forEach((cb) => cb());
     };
     try {
       excetor(resolve, reject);
@@ -26,76 +26,63 @@ class MyPromise {
       reject(error);
     }
   }
-
-  then(onFulfiled?: Function, onRejected?: Function) {
-    // 值的穿透
-    onFulfiled =
-      typeof onFulfiled === "function" ? onFulfiled : (value: any) => value;
+  then(onFulfiled: Function | any, onRejected: Function | any) {
+    onFulfiled = typeof onFulfiled === "function" ? onFulfiled : (value: any) => value;
     onRejected =
       typeof onRejected === "function"
         ? onRejected
         : (reason: any) => {
             throw reason;
           };
-
-    return new MyPromise((resolve, reject) => {
+    return new Wsl((nextResolve, nextRejected) => {
       const handleFulfiled = () => {
         setTimeout(() => {
           try {
-            const result = onFulfiled!(this.value);
-            // 如果返回的是 Promise，递归处理
-            if (result instanceof MyPromise) {
-              result.then(resolve, reject);
-            } else {
-              resolve(result);
-            }
-          } catch (error) {
-            reject(error);
+            const result = onFulfiled(this.value);
+            this.resolvePromise(result, nextResolve, nextRejected);
+          } catch (e) {
+            nextRejected(e);
           }
         }, 0);
       };
-
       const handleRejected = () => {
         setTimeout(() => {
           try {
-            const result = onRejected!(this.reason);
-            // 如果返回的是 Promise，递归处理
-            if (result instanceof MyPromise) {
-              result.then(resolve, reject);
-            } else {
-              resolve(result); // 注意：rejected 回调中返回非错误值会转为 resolve
-            }
+            const res = onRejected(this.reason);
+            this.resolvePromise(res, nextResolve, nextRejected);
           } catch (error) {
-            reject(error);
+            nextRejected(error);
           }
         }, 0);
       };
-
       if (this.state === "pending") {
-        this.fulfilCallBacks.push(() => handleFulfiled());
-        this.rejectCallBacks.push(() => handleRejected());
+        this.fulfilCallBacks.push(handleFulfiled);
+        this.rejectedCallBacks.push(handleRejected);
       }
-      if (this.state === "fulfilled") {
-        handleFulfiled();
-      }
-      if (this.state === "rejected") {
+      if (this.state === "reject") {
         handleRejected();
+      }
+      if (this.state === "resolve") {
+        handleFulfiled();
       }
     });
   }
-
-  // 添加 catch 方法
-  catch(onRejected: Function) {
-    return this.then(undefined, onRejected);
+  resolvePromise(value: any, resolve: resolveType, reject: rejectType) {
+    if (this.thenable(value)) {
+      value.then(resolve, reject);
+      return;
+    }
+    try {
+      resolve(value);
+    } catch (error) {
+      reject(error);
+    }
   }
-
-  // 添加静态 resolve
-  static resolve(value: any) {
-    return new MyPromise((resolve) => resolve(value));
-  }
-
-  // 添加静态 reject
-  static reject(reason: any) {
-    return new MyPromise((_, reject) => reject(reason));
+  thenable(value: any) {
+    if (typeof value === "object" && value !== null) {
+      const then = value.then;
+      if (then && typeof then === "function") return true;
+    }
+    return false;
   }
 }

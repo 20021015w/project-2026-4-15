@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-
 export interface EUseDropProps {
   onDragEnter?: (e: DragEvent) => void;
   onMove?: (e: DragEvent) => void;
