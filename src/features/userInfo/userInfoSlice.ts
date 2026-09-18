@@ -3,11 +3,11 @@ import { RootState } from "@/app/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { LocalStorage } from "@utils/method";
 import { UserInfo } from "./type";
-
+import { AuthLoginResponse } from "@/models/api.types";
 export const userInfoSlice = createSlice({
   name: EStoreSliceKey.USERINFO,
   reducers: {
-    update: (state, action: PayloadAction<UserInfo>) => {
+    update: (state, action: PayloadAction<AuthLoginResponse>) => {
       const { token } = action.payload;
       LocalStorage.setLocal("accessToken", token);
       return { ...state, ...action.payload };
@@ -23,6 +23,5 @@ export const userInfoSlice = createSlice({
 });
 
 export const { update, clear } = userInfoSlice.actions;
-export const userInfo = (state: RootState) =>
-  state[EStoreSliceKey.USERINFO] as UserInfo;
+export const userInfo = (state: RootState) => state[EStoreSliceKey.USERINFO] as UserInfo;
 export default userInfoSlice.reducer;

@@ -29,7 +29,7 @@ module.exports = {
     static: {
       directory: path.join(__dirname, "public"),
     },
-    port: 3000,
+    port: 5713,
     hot: true,
     compress: true,
     historyApiFallback: true,
@@ -41,11 +41,10 @@ module.exports = {
       },
       progress: true,
     },
-    // ✅修复：proxy改为数组 + context，移除废弃的headers/logLevel配置
     proxy: [
       {
         context: ["/api"],
-        target: "http://localhost:3001",
+        target: "http://localhost:3000",
         changeOrigin: true,
         secure: false,
         ws: true,
@@ -58,21 +57,20 @@ module.exports = {
         },
 
         onProxyRes: (proxyRes, req, res) => {
-          // 响应跨域头在这里设置
-          proxyRes.headers["Access‑Control‑Allow‑Origin"] = "*";
-          proxyRes.headers["Access‑Control‑Allow‑Methods"] =
+          proxyRes.headers["Access-Control-Allow-Origin"] = "*";
+          proxyRes.headers["Access-Control-Allow-Methods"] =
             "GET, POST, PUT, DELETE, PATCH, OPTIONS";
-          proxyRes.headers["Access‑Control‑Allow‑Headers"] =
-            "X‑Requested‑With, content‑type, Authorization";
+          proxyRes.headers["Access-Control-Allow-Headers"] =
+            "X-Requested-With, content-type, Authorization";
         },
       },
     ],
     allowedHosts: "all",
     headers: {
-      "Access‑Control‑Allow‑Origin": "*",
-      "Access‑Control‑Allow‑Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-      "Access‑Control‑Allow‑Headers":
-        "X‑Requested‑With, content‑type, Authorization",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+      "Access-Control-Allow-Headers":
+        "X-Requested-With, content-type, Authorization",
     },
   },
 
