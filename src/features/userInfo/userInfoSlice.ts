@@ -8,8 +8,9 @@ export const userInfoSlice = createSlice({
   name: EStoreSliceKey.USERINFO,
   reducers: {
     update: (state, action: PayloadAction<AuthLoginResponse>) => {
-      const { token } = action.payload;
+      const { token, refreshToken } = action.payload;
       LocalStorage.setLocal("accessToken", token);
+      LocalStorage.setLocal("refreshToken", refreshToken);
       return { ...state, ...action.payload };
     },
     clear: () => {

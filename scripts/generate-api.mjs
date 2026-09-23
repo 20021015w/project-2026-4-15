@@ -129,7 +129,6 @@ const schemasFile =
   schemasBody +
   '\n\n' +
   schemasExport
-
 // ---------- 4. 生成 src/models/api.types.ts ----------
 const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1)
 const typeAliases = schemaNames.map((n) => `export type ${capitalize(n)} = z.infer<typeof Schemas.${n}>`).join('\n')
@@ -193,17 +192,25 @@ const clientMethods = endpoints.map((ep) => {
 
   const defaultType = ref.response ? typeNameOf(ref.response) : 'unknown'
 
+  // 统一走 packages/utils 封装的 Http（@utils/method）：GET/POST 用快捷方法，其余走 Http.request
+  // 注意：Http.get/post 的泛型为 <T 响应, D 参数>，两个类型参数都必须显式传入
   let call
   if (ep.method === 'GET') {
-    call = ref.query
-      ? `return api.get<ApiResponse<D>>(${urlExpr}, { params: query }).then((r) => r.data)`
-      : `return api.get<ApiResponse<D>>(${urlExpr}).then((r) => r.data)`
+    const paramsType = ref.query ? typeNameOf(ref.query) : 'undefined'
+    const paramsArg = ref.query ? 'query' : 'undefined'
+    call = `return Http.get<ApiResponse<D>, ${paramsType}>(${urlExpr}, ${paramsArg}, baseConfig()).then((r) => r.data);`
   } else if (ep.method === 'POST') {
-    call = `return api.post<ApiResponse<D>>(${urlExpr}, body).then((r) => r.data)`
-  } else if (ep.method === 'PUT') {
-    call = `return api.put<ApiResponse<D>>(${urlExpr}, body).then((r) => r.data)`
+    const bodyType = ref.body ? typeNameOf(ref.body) : 'undefined'
+    const bodyArg = ref.body ? 'body' : 'undefined'
+    call = `return Http.post<ApiResponse<D>, ${bodyType}>(${urlExpr}, ${bodyArg}, baseConfig()).then((r) => r.data);`
   } else {
-    call = `return api.delete<ApiResponse<D>>(${urlExpr}).then((r) => r.data)`
+    const dataLine = ref.body ? `\n    data: body,` : ''
+    call =
+      `return Http.request<ApiResponse<D>>({\n` +
+      `    method: ${JSON.stringify(ep.method)},\n` +
+      `    url: ${urlExpr},${dataLine}\n` +
+      `    ...baseConfig(),\n` +
+      `  }).then((r) => r.data);`
   }
 
   return (
@@ -215,23 +222,36 @@ const clientMethods = endpoints.map((ep) => {
 })
 
 const clientTypesImport =
-  `import type {\n${schemaNames.map((n) => `  ${typeNameOf(n)},`).join('\n')}\n} from './api.types'\n`
+  `import type {\n${schemaNames.map((n) => `  ${typeNameOf(n)},`).join('\n')}\n} from "./api.types";\n`
 
 const clientFile =
   AUTO_GEN_NOTE +
-  `import axios from 'axios'\n\n` +
+  `import { Http } from "@utils/method";\n\n` +
   clientTypesImport +
   `\n` +
-  `/** axios 实例：前端所有接口请求都走这里 */\nexport const api = axios.create({ baseURL: '', timeout: 15000 })\n\n` +
-  `/** 设置后端地址（默认走 webpack devServer 代理 /api -> :3000） */\nexport function setApiBaseUrl(url: string) {\n  api.defaults.baseURL = url\n}\n\n` +
-  `/** 默认从 localStorage 读取 token（非浏览器环境返回 null），可通过 setTokenProvider 覆盖 */\nlet tokenProvider: () => string | null = () =>\n  typeof localStorage !== 'undefined' ? localStorage.getItem('token') ?? null : null\n` +
-  `export function setTokenProvider(fn: () => string | null) {\n  tokenProvider = fn\n}\n\n` +
-  `api.interceptors.request.use((config) => {\n` +
-  `  const token = tokenProvider()\n` +
-  `  if (token) config.headers.Authorization = \`Bearer \${token}\`\n` +
-  `  return config\n` +
-  `})\n\n` +
-  `/** 后端统一响应结构 */\nexport interface ApiResponse<T = unknown> {\n  code: number\n  message: string\n  data: T\n}\n\n` +
+  `/**\n` +
+  ` * 所有请求统一走 packages/utils 封装的 Http（@utils/method）。\n` +
+  ` * 注意：不要调用 Http.initHttp —— 它的响应拦截器会把响应解包成 data 字段，\n` +
+  ` * 而这里需要完整保留后端统一响应结构 { code, message, data }。\n` +
+  ` */\n\n` +
+  `/** 后端统一响应结构 */\n` +
+  `export interface ApiResponse<T = unknown> {\n  code: number;\n  message: string;\n  data: T;\n}\n\n` +
+  `/** 后端地址（默认为空，走 webpack devServer 代理 /api -> :3000） */\n` +
+  `let baseUrl = "";\n\n` +
+  `/** 设置后端地址 */\n` +
+  `export function setApiBaseUrl(url: string) {\n  baseUrl = url;\n}\n\n` +
+  `/** 默认从 localStorage 读取 token（非浏览器环境返回 null），可通过 setTokenProvider 覆盖 */\n` +
+  `let tokenProvider: () => string | null = () =>\n  typeof localStorage !== "undefined" ? (localStorage.getItem("token") ?? null) : null;\n\n` +
+  `export function setTokenProvider(fn: () => string | null) {\n  tokenProvider = fn;\n}\n\n` +
+  `/** 每个请求的公共配置：后端地址 + 超时 + 登录态 token，随请求传给 Http */\n` +
+  `function baseConfig() {\n` +
+  `  const token = tokenProvider();\n` +
+  `  return {\n` +
+  `    baseURL: baseUrl,\n` +
+  `    timeout: 15000,\n` +
+  `    headers: token ? { Authorization: \`Bearer \${token}\` } : undefined,\n` +
+  `  };\n` +
+  `}\n\n` +
   `// ==================== 接口方法（自动生成） ====================\n\n` +
   clientMethods.join('\n')
 

@@ -1,6 +1,9 @@
 import type { Request, Response } from "express";
 import { AppError } from "../middleware/error.js";
 import { authService } from "../services/auth.service.js";
+import jwt from "jsonwebtoken";
+import { userService } from "../services/user.service.js";
+import { config } from "../config.js";
 
 export const authController = {
   // POST /api/auth/register  { email, password, name? }
@@ -28,5 +31,15 @@ export const authController = {
     }
     const data = await authService.login(String(email), String(password));
     res.json({ code: 0, message: "ok", data });
+  },
+
+  // refresh
+  async refresh(req: Request, res: Response) {
+    const { refreshToken } = req.body;
+    const { userId } = jwt.decode(refreshToken) as { userId: number };
+    const data = await userService.get(userId);
+    const newToken = jwt.sign(data, config.jwtSecret, {
+      expiresIn: config.jwtExpiresIn,
+    });
   },
 };

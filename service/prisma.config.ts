@@ -3,12 +3,24 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
+// 按 .env 中的 DB_PROVIDER 切换 MySQL / PostgreSQL
+// 切换命令: pnpm db:use mysql  /  pnpm db:use postgres
+const provider = process.env.DB_PROVIDER === "postgres" ? "postgres" : "mysql";
+const url = provider === "postgres" ? process.env.POSTGRES_URL : process.env.MYSQL_URL;
+
+if (!url) {
+  throw new Error(
+    `缺少数据库连接串：请在 service/.env 中配置 ${provider === "postgres" ? "POSTGRES_URL" : "MYSQL_URL"}`,
+  );
+}
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
-    path: "prisma/migrations",
+    // 按数据库分开存放迁移文件，避免两种 SQL 方言混在一个目录
+    path: `prisma/migrations/${provider}`,
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url,
   },
 });

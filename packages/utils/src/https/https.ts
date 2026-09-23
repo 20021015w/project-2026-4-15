@@ -1,9 +1,4 @@
-import axios, {
-  AxiosError,
-  AxiosPromise,
-  AxiosRequestConfig,
-  AxiosResponse,
-} from "axios";
+import axios, { AxiosError, AxiosPromise, AxiosRequestConfig, AxiosResponse } from "axios";
 
 export class Http {
   private static HttpConfig = {
@@ -40,11 +35,7 @@ export class Http {
     return this.axiosInstance.request(config);
   }
 
-  static get = <T, D>(
-    url: string,
-    params?: D,
-    config?: AxiosRequestConfig,
-  ): AxiosPromise<T> => {
+  static get = <T, D>(url: string, params?: D, config?: AxiosRequestConfig): AxiosPromise<T> => {
     return Http.request({
       method: "GET",
       url,
@@ -53,11 +44,7 @@ export class Http {
     });
   };
 
-  static post = <T, D>(
-    url: string,
-    data?: D,
-    config?: AxiosRequestConfig,
-  ): AxiosPromise<T> => {
+  static post = <T, D>(url: string, data?: D, config?: AxiosRequestConfig): AxiosPromise<T> => {
     return Http.request({
       method: "POST",
       url,
@@ -93,11 +80,7 @@ export class Http {
         return new Promise((resolve) => {
           if (this.responseIntercepter) {
             const result = this.responseIntercepter(response);
-            resolve(
-              result !== undefined
-                ? result
-                : response.data?.data || response.data,
-            );
+            resolve(result !== undefined ? result : response.data?.data || response.data);
           } else {
             resolve(response.data?.data || response.data);
           }
@@ -110,8 +93,7 @@ export class Http {
 
         // 检查是否是未授权错误
         const isUnAuth =
-          error.response?.status === 401 ||
-          error.code === this.HttpConfig.unAuthority;
+          error.response?.status === 401 || error.code === this.HttpConfig.unAuthority;
 
         if (isUnAuth && !originalRequest._retry) {
           // 如果正在刷新token，将请求加入队列
@@ -192,8 +174,7 @@ export class Http {
         refreshToken: refreshToken,
       });
 
-      const newAccessToken =
-        response.data?.data?.accessToken || response.data?.accessToken;
+      const newAccessToken = response.data?.data?.accessToken || response.data?.accessToken;
       if (!newAccessToken) {
         throw new Error("Refresh failed");
       }

@@ -34,8 +34,16 @@ export const authService = {
     const token = jwt.sign({ userId: user.id, email: user.email }, config.jwtSecret, {
       expiresIn: config.jwtExpiresIn,
     });
+    const refreshToken = jwt.sign(
+      { userId: user.id, email: user.email },
+      `${config.jwtSecret} refresh`,
+      {
+        expiresIn: config.jwtRefreshExpiresIn,
+      },
+    );
     return {
       token,
+      refreshToken,
       user: { id: user.id, email: user.email, name: user.name },
     };
   },

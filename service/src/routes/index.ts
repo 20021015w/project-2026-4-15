@@ -4,13 +4,12 @@ import { authController } from "../controllers/auth.controller.js";
 import { listController } from "../controllers/list.controller.js";
 import { userController } from "../controllers/user.controller.js";
 import { postController } from "../controllers/post.controller.js";
-
 const router = Router();
 
 // ===== 公开路由 =====
 router.post("/auth/register", authController.register);
 router.post("/auth/login", authController.login);
-
+router.post("/auth/refresh", authController.refresh);
 // ===== 受保护路由组：插件化注入认证中间件 =====
 const protectedRouter = Router();
 protectedRouter.use(auth);

@@ -35,26 +35,37 @@ export const openModal = (options: OpenModalOptions): string => {
   let isClosed = false;
   let isOpen = true;
 
-  const { content, ...modalProps } = options;
+  const { content, onOk, onCancel, ...modalProps } = options;
 
   const destroy = () => {
     if (isClosed) return;
     isClosed = true;
-
     // 从栈中移除
     const index = modalStack.findIndex((item) => item.id === id);
     if (index !== -1) {
       modalStack.splice(index, 1);
     }
-
-    // 清理 DOM
     setTimeout(() => {
       root.unmount();
       div.remove();
     }, 300);
-
-    // 触发关闭回调
     options.afterClose?.();
+  };
+
+  // 包装用户传入的 onOk：执行成功后关闭弹窗；抛错（如表单校验失败）时保持打开
+  const handleOk: ModalProps["onOk"] = async (e) => {
+    try {
+      await onOk?.(e);
+    } catch {
+      return;
+    }
+    close();
+  };
+
+  // 包装用户传入的 onCancel：先执行回调再关闭
+  const handleCancel: ModalProps["onCancel"] = (e) => {
+    onCancel?.(e);
+    close();
   };
 
   const close = () => {
@@ -63,7 +74,15 @@ export const openModal = (options: OpenModalOptions): string => {
 
     // 重新渲染 Modal，将 open 设置为 false
     root.render(
-      <Modal {...modalProps} open={false} zIndex={zIndex} afterClose={destroy}>
+      <Modal
+        {...modalProps}
+        open={false}
+        zIndex={zIndex}
+        afterClose={destroy}
+        onCancel={handleCancel}
+        onOk={handleOk}
+        destroyOnHidden={true}
+      >
         {content}
       </Modal>,
     );
@@ -76,8 +95,8 @@ export const openModal = (options: OpenModalOptions): string => {
       open={true}
       zIndex={zIndex}
       afterClose={destroy}
-      onCancel={close}
-      onOk={close}
+      onCancel={handleCancel}
+      onOk={handleOk}
     >
       {content}
     </Modal>,
@@ -91,10 +110,9 @@ export const openModal = (options: OpenModalOptions): string => {
 
 // 关闭指定 Modal
 export const closeModal = (id: string) => {
-  const index = modalStack.findIndex((item) => item.id === id);
-  if (index !== -1) {
-    modalStack[index].destroy();
-    modalStack.splice(index, 1);
+  const instance = modalStack.find((item) => item.id === id);
+  if (instance) {
+    instance.destroy();
   }
 };
 
@@ -117,10 +135,10 @@ export const closeAllModals = () => {
 
 // 关闭除了指定 ID 以外的所有 Modal
 export const closeOthersModal = (keepId: string) => {
+  // 从后往前遍历，防止数组塌陷
   for (let i = modalStack.length - 1; i >= 0; i--) {
     if (modalStack[i].id !== keepId) {
       modalStack[i].destroy();
-      modalStack.splice(i, 1);
     }
   }
 };

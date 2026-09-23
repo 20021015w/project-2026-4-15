@@ -1,5 +1,6 @@
-// Prisma schema for project-backend (MySQL)
+// Prisma schema for project-backend
 // docs: https://pris.ly/d/prisma-schema
+// 注意：datasource 的 provider 由 `pnpm db:use mysql|postgres` 切换脚本维护，请勿手工修改
 
 generator client {
   provider = "prisma-client"

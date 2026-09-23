@@ -55,14 +55,22 @@ export const authLoginBody = z.object({
   email: z.email("邮箱格式不正确"),
   password: z.string().min(1, "password 为必填项"),
 });
-
+export const authRefreshBody = z.object({
+  refreshToken: z.string(),
+});
+export const authRefreshResponse = z.object({
+  refreshToken: z.string(),
+  token:z.string()
+});
 export const authRegisterResponse = z.object({
   token: z.string(),
+  refreshToken: z.string(),
   user: userItem,
 });
 
 export const authLoginResponse = z.object({
   token: z.string(),
+  refreshToken: z.string(),
   user: userBrief,
 });
 
@@ -141,6 +149,15 @@ export const apiEndpoints = [
     summary: "登录，返回 token 与用户信息",
     body: authLoginBody,
     response: authLoginResponse,
+  },
+  {
+    name: "auth/refresh",
+    method: "POST",
+    path: "/api/auth/refresh",
+    auth: false,
+    summary: "刷新token",
+    body: authRefreshBody,
+    response: authRefreshResponse,
   },
   {
     name: "lists.list",
