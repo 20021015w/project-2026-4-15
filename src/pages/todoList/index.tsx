@@ -8,7 +8,7 @@ import {
   todoList,
 } from "@/features/list/listSlice";
 import { ListBase } from "@/features/list/type";
-import { Button, Checkbox, Input, List, message, Popconfirm, Space, Tag } from "antd";
+import { Button, Checkbox, Flex, Input, List, message, Popconfirm, Space, Tag } from "antd";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 import styles from "./index.less";
@@ -44,10 +44,20 @@ const ListTodo = () => {
   const onDrop = useCallback(
     (dragMeta: DragMeta<ListBase>, targetContainerKey: string) => {
       const { item, sourceContainerKey } = dragMeta;
-      console.log(item, sourceContainerKey, targetContainerKey);
       if (sourceContainerKey === targetContainerKey) return;
+      if (item.status === "ARCHIVED") {
+        message.warning("已归档任务不能操作");
+        return;
+      }
+      if (item.status === "PENDING" && targetContainerKey === "ARCHIVED") {
+        message.warning("未完成任务不能归档");
+        return;
+      }
       let dispatcher = null;
-      if (targetContainerKey === "PENDING") message.warning("禁止重新开始任务");
+      if (targetContainerKey === "PENDING") {
+        message.warning("禁止重新开始任务");
+        return;
+      }
       switch (targetContainerKey) {
         case "DONE":
           dispatcher = done;
@@ -59,7 +69,7 @@ const ListTodo = () => {
           break;
       }
       if (dispatcher) {
-        dispatcher(item.id);
+        dispatch(dispatcher(item.id));
       }
     },
     [dispatch],
@@ -74,6 +84,10 @@ const ListTodo = () => {
         status: "PENDING",
         displayIndex: dataSource.length,
         title: "",
+        // 新增字段：任务创建时间
+        createdAt: new Date().toISOString(),
+        // 新增字段：任务完成时间
+        updatedAt: new Date().toISOString(),
       };
       dispatch(addList(newItem));
     }
@@ -123,8 +137,23 @@ const ListTodo = () => {
                     );
                   }}
                 >
-                  <span>{item.content}</span>
-                  <Space>{getTag(item.status)}</Space>
+                  <List.Item.Meta
+                    title={item.title}
+                    description={
+                      <Flex gap={8} vertical>
+                        <span>{item.content}</span>
+                        {item.createdAt
+                          ? `创建时间：${new Date(item.createdAt).toLocaleString()}`
+                          : ""}
+                        {item.updatedAt
+                          ? `更新时间：${new Date(item.updatedAt).toLocaleString()}`
+                          : ""}
+                      </Flex>
+                    }
+                  />
+                  <div>
+                    <Space>{getTag(item.status)}</Space>
+                  </div>
                 </List.Item>
               )}
             />

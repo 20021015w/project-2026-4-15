@@ -18,6 +18,10 @@ const initValue: ListState = {
       displayIndex: 0,
       title: "",
       id: "0",
+      // 新增字段：任务创建时间
+      createdAt: "",
+      // 新增字段：任务完成时间
+      updatedAt: "",
     },
   ],
   loading: false,
@@ -38,6 +42,10 @@ export const fetchList = createAsyncThunk(
         status: item.status,
         displayIndex: index,
         title: item.title || "",
+        // 新增字段：任务创建时间
+        createdAt: item.createdAt || "",
+        // 新增字段：任务完成时间
+        updatedAt: item.updatedAt || "",
       }));
     } catch (err: any) {
       return rejectWithValue(err?.message || "网络错误，获取列表失败");
