@@ -1,6 +1,5 @@
 .container {
   padding: 20px;
-  max-width: 800px;
   .list {
     margin-bottom: 16px;
     padding: 12px;
@@ -9,8 +8,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
     .selectOption {
       color: grey;
+    }
+  }
+  .listContainer {
+    margin-bottom: 16px;
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    .listCol {
+      flex: 1;
     }
   }
 }

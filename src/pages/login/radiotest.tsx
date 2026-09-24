@@ -1,16 +1,9 @@
 import { AuthRegisterBody } from "@/models/api.types";
 import { Form, Input } from "antd";
 import { FormInstance } from "antd/lib";
-import { useEffect, type FC } from "react";
+import { type FC } from "react";
 
 export const Register: FC<{ registerForm: FormInstance }> = ({ registerForm }) => {
-  useEffect(() => {
-    console.log("Register mounted");
-    console.log("registForm values:", registerForm.getFieldsValue());
-    return () => {
-      console.log("Register unmounted");
-    };
-  }, []);
   return (
     <Form<AuthRegisterBody & { comfirmPwd: string }> form={registerForm} labelCol={{ span: 4 }}>
       <Form.Item name={"email"} label={"邮箱"}>

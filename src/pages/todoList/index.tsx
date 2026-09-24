@@ -1,84 +1,79 @@
 import { useAppDispatch, useAppSelector } from "@/app/hook";
 import {
   addList,
+  archiveTodo,
   deleteTodo,
   deleteTodos,
   done,
   todoList,
 } from "@/features/list/listSlice";
 import { ListBase } from "@/features/list/type";
-import { DeleteFilled, DeleteOutlined } from "@ant-design/icons";
-import { Button, Checkbox, Input, List, Popconfirm, Space } from "antd";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { Button, Checkbox, Input, List, message, Popconfirm, Space, Tag } from "antd";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 import styles from "./index.less";
+import { fetchList } from "@/features/list/listSlice";
+import { useDrop } from "@/utils/useDrop";
+import { DropContainer } from "./component/doneContainer";
+import { DragMeta } from "./component/type";
 const ListTodo = () => {
   const dispatch = useAppDispatch();
   const dataSource = useAppSelector(todoList)
-    .slice()
+    .data.slice()
     .sort((a, b) => a.displayIndex - b.displayIndex);
-  console.log(dataSource);
+  useEffect(() => {
+    dispatch(fetchList({}));
+  }, []);
+  const statusMapItem = useMemo(() => {
+    return dataSource.reduce(
+      (prev, cur) => {
+        prev[cur.status] = [...(prev[cur.status] || []), cur];
+        return prev;
+      },
+      {} as Record<"PENDING" | "DONE" | "ARCHIVED", ListBase[]>,
+    );
+  }, [dataSource]);
   const [inputValue, setInputValue] = useState<string>("");
   const inputRef = useRef<any>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
-
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-
-  const selectedCount = useMemo(() => selectedIds.size, [selectedIds]);
-
-  const onToggle = useCallback(
-    (id: string) => {
-      dispatch(done(id));
+  const { setRef } = useDrop({
+    onDrop: (e) => {
+      console.log(e.dataTransfer?.getData("listItem"));
     },
-    [dispatch],
-  );
-
-  const onDelete = useCallback(
-    (id: string) => {
-      dispatch(deleteTodo(id));
-      setSelectedIds((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(id);
-        return newSet;
-      });
-    },
-    [dispatch],
-  );
-
-  const onBatchDelete = useCallback(() => {
-    if (selectedIds.size === 0) return;
-    dispatch(deleteTodos(Array.from(selectedIds)));
-    setSelectedIds(new Set()); // 清空选中
-  }, [dispatch, selectedIds]);
-
-  const onSelectAll = useCallback(() => {
-    if (selectedIds.size === dataSource.length) {
-      setSelectedIds(new Set()); // 全部取消
-    } else {
-      setSelectedIds(new Set(dataSource.map((item) => item.id))); // 全部选中
-    }
-  }, [dataSource, selectedIds]);
-
-  const onSelectItem = useCallback((id: string, checked: boolean) => {
-    setSelectedIds((prev) => {
-      const newSet = new Set(prev);
-      if (checked) {
-        newSet.add(id);
-      } else {
-        newSet.delete(id);
+  });
+  const onDrop = useCallback(
+    (dragMeta: DragMeta<ListBase>, targetContainerKey: string) => {
+      const { item, sourceContainerKey } = dragMeta;
+      console.log(item, sourceContainerKey, targetContainerKey);
+      if (sourceContainerKey === targetContainerKey) return;
+      let dispatcher = null;
+      if (targetContainerKey === "PENDING") message.warning("禁止重新开始任务");
+      switch (targetContainerKey) {
+        case "DONE":
+          dispatcher = done;
+          break;
+        case "ARCHIVED":
+          dispatcher = archiveTodo;
+          break;
+        default:
+          break;
       }
-      return newSet;
-    });
-  }, []);
+      if (dispatcher) {
+        dispatcher(item.id);
+      }
+    },
+    [dispatch],
+  );
 
   // ✅ 失焦时添加
   const handleBlur = useCallback(() => {
     if (inputValue.trim()) {
       const newItem: ListBase = {
         id: Date.now().toString(),
-        listInfo: inputValue.trim(),
-        isDone: false,
+        content: inputValue.trim(),
+        status: "PENDING",
         displayIndex: dataSource.length,
+        title: "",
       };
       dispatch(addList(newItem));
     }
@@ -93,104 +88,49 @@ const ListTodo = () => {
       inputRef.current?.focus?.();
     }, 0);
   }, []);
-
+  const getTag = useCallback((status: ListBase["status"]) => {
+    switch (status) {
+      case "DONE":
+        return <Tag color="green">已完成</Tag>;
+      case "PENDING":
+        return <Tag color="red">未完成</Tag>;
+      case "ARCHIVED":
+        return <Tag color="orange">已归档</Tag>;
+    }
+  }, []);
   return (
     <div className={styles.container}>
-      <div className={styles.list}>
-        <Space>
-          <Checkbox
-            onChange={onSelectAll}
-            checked={
-              selectedIds.size === dataSource.length && dataSource.length > 0
-            }
-            indeterminate={
-              selectedIds.size > 0 && selectedIds.size < dataSource.length
-            }
-          >
-            {selectedIds.size === dataSource.length ? "取消全选" : "全选"}
-          </Checkbox>
-          <span className={styles.selectOption}>
-            {selectedCount > 0 ? `已选中 ${selectedCount} 项` : ""}
-          </span>
-        </Space>
-
-        {selectedCount > 0 && (
-          <Popconfirm
-            title={`确定要删除选中的 ${selectedCount} 个待办吗？`}
-            onConfirm={onBatchDelete}
-            okText="确定"
-            cancelText="取消"
-          >
-            <Button type="primary" danger icon={<DeleteFilled />}>
-              批量删除 ({selectedCount})
-            </Button>
-          </Popconfirm>
-        )}
-      </div>
-
       {/* 待办列表 */}
-      <List
-        dataSource={dataSource}
-        renderItem={(item) => (
-          <List.Item
-            key={item.id}
-            style={{
-              background: selectedIds.has(item.id) ? "#e6f7ff" : "white",
-              transition: "background 0.3s",
-              borderRadius: 4,
-              marginBottom: 4,
-            }}
-            actions={[
-              <Space>
-                <Checkbox
-                  checked={item.isDone}
-                  onChange={() => onToggle(item.id)}
-                >
-                  完成
-                </Checkbox>
-
-                <Checkbox
-                  checked={selectedIds.has(item.id)}
-                  onChange={(e) => onSelectItem(item.id, e.target.checked)}
-                />
-
-                <Popconfirm
-                  title="确定要删除这个待办吗？"
-                  onConfirm={() => onDelete(item.id)}
-                  okText="确定"
-                  cancelText="取消"
-                >
-                  <Button
-                    type="text"
-                    danger
-                    size="small"
-                    icon={<DeleteOutlined />}
-                  />
-                </Popconfirm>
-              </Space>,
-            ]}
+      <div className={styles.listContainer}>
+        {Object.entries(statusMapItem).map(([status, items]) => (
+          <DropContainer
+            key={status}
+            containerKey={status}
+            onDrop={onDrop}
+            className={styles.listCol}
           >
-            <List.Item.Meta
-              title={
-                <span
-                  style={{
-                    textDecoration: item.isDone ? "line-through" : "none",
-                    color: item.isDone ? "#52c41a" : "rgba(0, 0, 0, 0.85)",
-                    fontWeight: item.isDone ? "normal" : 500,
+            <List
+              dataSource={items}
+              renderItem={(item) => (
+                <List.Item
+                  ref={setRef(item.id)}
+                  key={item.id}
+                  draggable
+                  onDragStart={(e) => {
+                    e.dataTransfer?.setData(
+                      "dragMeta",
+                      JSON.stringify({ item, sourceContainerKey: status }),
+                    );
                   }}
                 >
-                  {item.listInfo}
-                </span>
-              }
-              description={
-                <span style={{ fontSize: 12, color: "#999" }}>
-                  ID: {item.id.slice(-4)} • 序号: {item.displayIndex}
-                </span>
-              }
+                  <span>{item.content}</span>
+                  <Space>{getTag(item.status)}</Space>
+                </List.Item>
+              )}
             />
-          </List.Item>
-        )}
-      />
+          </DropContainer>
+        ))}
+      </div>
 
       {/* 添加待办区域 */}
       {isEditing ? (
@@ -223,12 +163,7 @@ const ListTodo = () => {
           </div>
         </div>
       ) : (
-        <Button
-          type="primary"
-          onClick={handleAddClick}
-          style={{ marginTop: 16 }}
-          block
-        >
+        <Button type="primary" onClick={handleAddClick} style={{ marginTop: 16 }} block>
           + 添加待办
         </Button>
       )}

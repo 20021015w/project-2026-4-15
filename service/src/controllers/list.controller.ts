@@ -8,7 +8,8 @@ export const listController = {
   // GET /api/lists?status=PENDING
   async list(req: AuthRequest, res: Response) {
     const status = req.query.status as ListStatus | undefined;
-    const items = await listService.list(status);
+    const user = req.user;
+    const items = await listService.list(user!.userId, status);
     res.json({ code: 0, message: "ok", data: items });
   },
 

@@ -1,6 +1,7 @@
 import { prisma } from "../lib/prisma.js";
 import { AppError } from "../middleware/error.js";
 import type { ListStatus } from "../../generated/prisma/enums.js";
+import { ListFindManyArgs } from "../../generated/prisma/models.js";
 
 export interface ListCreateInput {
   title: string;
@@ -15,9 +16,9 @@ export interface ListUpdateInput {
 }
 
 export const listService = {
-  async list(status?: ListStatus) {
+  async list(userId: number, status?: ListStatus) {
     return prisma.list.findMany({
-      where: status ? { status } : undefined,
+      where: { user_id: userId, status },
       orderBy: { createdAt: "desc" },
     });
   },

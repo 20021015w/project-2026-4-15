@@ -1,6 +1,7 @@
 export interface ListBase {
-  isDone: boolean;
-  listInfo: string;
+  status: "PENDING" | "DONE" | "ARCHIVED";
+  content: string;
   displayIndex: number;
   id: string;
+  title: string;
 }

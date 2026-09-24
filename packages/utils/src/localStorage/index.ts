@@ -2,7 +2,7 @@ export class LocalStorage {
   private static accessToken = "accessToken";
   private static refreshToken = "refreshToken";
   static getLocal(key: string) {
-    return localStorage.getItem(key) ?? "";
+    return JSON.parse(localStorage.getItem(key) ?? "{}")?.value ?? "";
   }
 
   static setLocal(key: string, value: string, expired: string = "0") {
