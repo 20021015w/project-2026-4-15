@@ -8,16 +8,12 @@ import { authLogin, authRegister } from "@/models/api.client";
 import { UserCreateBody } from "@/models/api.types";
 import { ClickModal } from "@ui/components/src/modal";
 import { Register } from "./radiotest";
-import { useEffect } from "react";
 const Logining = () => {
   const [form] = Form.useForm();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [registForm] = Form.useForm();
-  useEffect(() => {
-    console.log("form values:", form.getFieldsValue());
-    console.log("registForm values:", registForm.getFieldsValue());
-  });
+
   const handleSubmit = async (values: UserCreateBody) => {
     try {
       const response = await authLogin(values);

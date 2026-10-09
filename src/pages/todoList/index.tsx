@@ -1,12 +1,5 @@
 import { useAppDispatch, useAppSelector } from "@/app/hook";
-import {
-  addList,
-  archiveTodo,
-  deleteTodo,
-  deleteTodos,
-  done,
-  todoList,
-} from "@/features/list/listSlice";
+import { addList, archiveTodo, done, todoList } from "@/features/list/listSlice";
 import { ListBase } from "@/features/list/type";
 import { Button, Checkbox, Flex, Input, List, message, Popconfirm, Space, Tag } from "antd";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";

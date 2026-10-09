@@ -33,7 +33,7 @@ export const useDrop = ({
     },
     [],
   );
-
+  const getRef = useCallback((key: string) => domMap.current.get(key), []);
   useEffect(() => {
     const cleanups: Array<() => void> = [];
 
@@ -88,5 +88,5 @@ export const useDrop = ({
     };
   }, [onDragEnter, onMove, onDragLeave, onDrop, capture]);
 
-  return { setRef };
+  return { setRef, getRef };
 };

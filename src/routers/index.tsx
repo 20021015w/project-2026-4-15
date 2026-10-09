@@ -1,9 +1,5 @@
 import React, { lazy, Suspense } from "react";
-import {
-  createBrowserRouter,
-  Navigate,
-  RouterProvider,
-} from "react-router-dom";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 
 // 使用lazy加载组件
 const Home = lazy(() => import("../pages/Home"));

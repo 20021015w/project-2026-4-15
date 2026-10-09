@@ -7,8 +7,7 @@ const SEMaxgraph = () => {
   // 保存 graph 实例
   const [graphService, setGraphService] = useState<GraphService | null>(null);
 
-  // ✅ useDrop 返回的就是容器 domRef
-  const containerRef = useDrop({
+  const { setRef, getRef } = useDrop({
     isDefPreview: true,
 
     onDragEnter: (e) => {
@@ -28,12 +27,12 @@ const SEMaxgraph = () => {
 
     // ✅ 核心：在这里使用 graphService
     onDrop: (e) => {
-      if (!graphService || !containerRef.current) return;
+      if (!graphService || !getRef("structureContainer")) return;
 
       const data = e.dataTransfer?.getData("a");
       if (!data) return;
 
-      const rect = containerRef.current.getBoundingClientRect();
+      const rect = getRef("structureContainer")!.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
@@ -44,7 +43,7 @@ const SEMaxgraph = () => {
 
   // 初始化 maxgraph
   useEffect(() => {
-    const el = containerRef.current;
+    const el = getRef("structureContainer");
     if (!el) return;
 
     const graph = createGraphService({ container: el });
@@ -56,7 +55,7 @@ const SEMaxgraph = () => {
     graph.addEdge(n1, n2, "Edge");
 
     return () => graph.destroy();
-  }, [containerRef]);
+  }, [getRef("structureContainer")]);
 
   return (
     <>
@@ -72,7 +71,7 @@ const SEMaxgraph = () => {
       </div>
 
       {/* ✅ 拖放目标容器 */}
-      <div className={styles.mxContainer} ref={containerRef} />
+      <div className={styles.mxContainer} ref={setRef("structureContainer")} />
     </>
   );
 };
