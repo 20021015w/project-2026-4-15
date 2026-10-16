@@ -1,5 +1,5 @@
 import { update } from "@/features/userInfo/userInfoSlice";
-import { Ripple } from "@ui/components/src/ripple";
+import { Ripple } from "@ui/components";
 import { Button, Form, Input, message, Modal, Radio } from "antd";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +8,9 @@ import { authLogin, authRegister } from "@/models/api.client";
 import { UserCreateBody } from "@/models/api.types";
 import { ClickModal } from "@ui/components/src/modal";
 import { Register } from "./radiotest";
+import { Mask } from "@ui/components";
+import { useRef } from "react";
+import { MaskRef } from "@ui/components/mask/type";
 const Logining = () => {
   const [form] = Form.useForm();
   const dispatch = useDispatch();
@@ -87,9 +90,14 @@ const Logining = () => {
     </div>
   );
 };
-const Login = () => (
-  <Ripple range={100}>
-    <Logining />
-  </Ripple>
-);
+const Login = () => {
+  const maskRef = useRef<MaskRef>(null);
+  return (
+    <Mask ref={maskRef}>
+      <Ripple range={100}>
+        <Logining />
+      </Ripple>
+    </Mask>
+  );
+};
 export default Login;

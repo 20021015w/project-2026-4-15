@@ -1,0 +1,33 @@
+.maskWrap {
+  position: relative; /* 关键：作为蒙层的定位父容器 */
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+}
+
+.maskLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  pointer-events: none; /* 可选：蒙层不拦截鼠标事件，让下层内容可点击 */
+}
+
+.maskContent {
+  position: relative; /* 提升层级，在蒙层之上渲染 */
+  z-index: 1;
+}
+
+.customChangeOpacity {
+  position: relative;
+  z-index: 2;
+  .slider {
+    width: 200px;
+    position: fixed;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}

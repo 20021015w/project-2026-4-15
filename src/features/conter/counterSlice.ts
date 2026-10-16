@@ -8,15 +8,12 @@ const initialState: CounterState = {
   error: null,
 };
 
-export const fetchCount = createAsyncThunk(
-  "counter/fetchCount",
-  async (amount: number) => {
-    const response = await new Promise<{ data: number }>((resolve) =>
-      setTimeout(() => resolve({ data: amount }), 1000),
-    );
-    return response.data;
-  },
-);
+export const fetchCount = createAsyncThunk("counter/fetchCount", async (amount: number) => {
+  const response = await new Promise<{ data: number }>((resolve) =>
+    setTimeout(() => resolve({ data: amount }), 1000),
+  );
+  return response.data;
+});
 
 const counterSlice = createSlice({
   name: EStoreSliceKey.COUNTER, // 这个name必须和动态reducer的key完全一致
@@ -52,15 +49,11 @@ const counterSlice = createSlice({
   },
 });
 
-export const { increment, decrement, incrementByAmount, reset } =
-  counterSlice.actions;
+export const { increment, decrement, incrementByAmount, reset } = counterSlice.actions;
 const selectCounterSlice = (state: RootState): CounterState =>
   state[EStoreSliceKey.COUNTER] as CounterState;
-export const selectCount = (state: RootState) =>
-  selectCounterSlice(state).value;
-export const selectCounterStatus = (state: RootState) =>
-  selectCounterSlice(state).status;
-export const selectCounterError = (state: RootState) =>
-  selectCounterSlice(state).error;
+export const selectCount = (state: RootState) => selectCounterSlice(state).value;
+export const selectCounterStatus = (state: RootState) => selectCounterSlice(state).status;
+export const selectCounterError = (state: RootState) => selectCounterSlice(state).error;
 
 export default counterSlice.reducer;

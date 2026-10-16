@@ -1,11 +1,7 @@
 import { useAppDispatch, useAppSelector } from "@/app/hook";
 import { useGurad } from "@/routers/useGuarg";
 import { Button } from "antd";
-import {
-  decrement,
-  increment,
-  selectCount,
-} from "../features/conter/counterSlice";
+import { decrement, increment, selectCount } from "../features/conter/counterSlice";
 import Chat from "./ai/chat";
 import styles from "./index.less";
 const Home = () => {
