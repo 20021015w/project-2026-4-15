@@ -22,6 +22,8 @@ function createPrisma(): PrismaClient {
     user: decodeURIComponent(url.username),
     password: decodeURIComponent(url.password),
     database: url.pathname.slice(1),
+    // MySQL 8 默认 caching_sha2_password，需要允许向服务端索取 RSA 公钥
+    allowPublicKeyRetrieval: true,
   });
   return new PrismaClient({ adapter });
 }
