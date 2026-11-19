@@ -12,7 +12,6 @@ const cxyProx = new Proxy(cyx, {
     }
     return Reflect.get(target, prop, receiver);
   },
-
   set(target, prop, value, receiver) {
     if (prop === "access") {
       if (typeof value === "number" && value > 0) {

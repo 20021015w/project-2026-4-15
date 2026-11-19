@@ -59,6 +59,10 @@ const router = createBrowserRouter([
       </Suspense>
     ),
   },
+  {
+    path: "/write",
+    element: <Suspense fallback={<Loading />}></Suspense>,
+  },
 ]);
 
 // 导出路由提供器组件
